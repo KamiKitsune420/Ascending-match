@@ -38,7 +38,7 @@ void sctext(string txt, int ms, string opnsnd, string scsound)
         wait(5);
     }
     // Play sound when Enter is pressed
-    p.play_stationary("sounds/dlg.ogg", false);
+    p.play_stationary("sounds/dlg.wav", false);
 }
 void dlgplay(string dlgsound, bool skippable=true, bool fadeable=true, int fadetime=30)
 {
@@ -50,6 +50,7 @@ while(dlgaudio.playing)
 wait(5);
 if(key_repeating(KEY_RETURN) and skippable==true or key_down(KEY_A) and skippable==true)
 {
+    p.play_stationary("sounds/titskip.wav", false);
 if (fadeable==true)
 {
 while (dlgaudio.volume>=-40)

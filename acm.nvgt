@@ -3,11 +3,9 @@ bool marked;
 bool []marknums;
 int gameround;
 int amount;
-int[] nums;
 int numker;
-int kurmovetime = 100;
+int[] nums;
 sound gamemus;
-timer kurmove;
 menu m;
 sound_pool p;
 void main()
@@ -51,13 +49,13 @@ while (true)
 wait(5);
 if(key_down(KEY_PAGEUP))
 {
-gamemus.volume+=1;
+gamemus.volume+=0.5;
 }
 else if(key_down(KEY_PAGEDOWN))
 {
-gamemus.volume-=1;
+gamemus.volume-=0.5;
 }
-if (key_pressed(KEY_RIGHT) && kurmove.elapsed >= kurmovetime) {
+if (key_repeating(KEY_RIGHT)) {
 if (numker < int(nums.length()) - 1) {
 numker++;
 p.play_stationary("sounds/curmove.wav", false);
@@ -70,7 +68,7 @@ if (marknums[numker]) {
 p.play_stationary("sounds/edge.wav", false);
 }
 }
-if (key_pressed(KEY_LEFT) && kurmove.elapsed >= kurmovetime) {
+if (key_repeating(KEY_LEFT)) {
 if (numker > 0) {
 numker--;
 p.play_stationary("sounds/curmove.wav", false);
@@ -83,7 +81,7 @@ if (marknums[numker]) {
 p.play_stationary("sounds/edge.wav", false);
 }
 }
-if (key_pressed(KEY_SPACE)) {
+if (key_repeating(KEY_SPACE)) {
 marknums[numker] = !marknums[numker];
 int count = 0;
 int first = -1, second = -1;
@@ -119,7 +117,7 @@ if (sorted) {
     speak("Round complete!");
     wait(1000);
     gameround++;
-gamemus.pitch+=1.5;
+gamemus.pitch+=1;
     gamesetup(); // repopulates everything
 game();
     return; // restart game loop from new round
@@ -127,10 +125,10 @@ game();
 } else {
     if (marknums[numker]) {
         p.play_stationary("sounds/marked.wav", false);
-        speak("Marked " + nums[numker]);
+        speak("Marked");
     } else {
         p.play_stationary("sounds/unmarked.wav", false);
-        speak("Unmarked " + nums[numker]);
+        speak("Unmarked");
     }
 }
 wait(150); // prevent accidental double presses
