@@ -1,1 +1,5 @@
-sounds/
+*.ogg
+*.wav
+New File*.txt
+lib/
+releases/
