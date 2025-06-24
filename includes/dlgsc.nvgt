@@ -1,12 +1,10 @@
 int txpos = 0;
 timer sctimer;
-
 void sctext(string txt, int ms, string opnsnd, string scsound)
 {
     txpos = 0;
     array<string> words;
     int start = 0;
-
     // Custom word-splitting loop
     for (int i = 0; i <= txt.length(); i++)
     {
@@ -16,11 +14,9 @@ void sctext(string txt, int ms, string opnsnd, string scsound)
             start = i + 1; // Move start to the character after the space
         }
     }
-
     // Speak the text
     p.play_stationary(opnsnd, false);
     speak(txt);
-
     while (txpos < words.length())
     {
         if (sctimer.elapsed >= ms)
@@ -29,22 +25,41 @@ void sctext(string txt, int ms, string opnsnd, string scsound)
             txpos++;  // Move to the next word
             sctimer.restart();
         }
-
         if (key_pressed(KEY_RETURN))
         {
             p.play_stationary("sounds/dlg.ogg", false);
             break;
         }
-
         wait(5);
     }
-
     // Wait for Enter key after text is fully displayed
     while (!key_pressed(KEY_RETURN))
     {
         wait(5);
     }
-
     // Play sound when Enter is pressed
     p.play_stationary("sounds/dlg.ogg", false);
+}
+void dlgplay(string dlgsound, bool skippable=true, bool fadeable=true, int fadetime=30)
+{
+sound dlgaudio;
+dlgaudio.load(dlgsound);
+dlgaudio.play();
+while(dlgaudio.playing)
+{
+wait(5);
+if(key_repeating(KEY_RETURN) and skippable==true or key_down(KEY_A) and skippable==true)
+{
+if (fadeable==true)
+{
+while (dlgaudio.volume>=-40)
+{
+dlgaudio.volume=dlgaudio.volume-2;
+wait(fadetime);
+}
+}
+dlgaudio.stop();
+break;
+}
+}
 }

@@ -1,37 +1,25 @@
 #include"includes/*.nvgt"
-sound tls,gamemus;
 int gameround;
 int amount;
+sound gamemus;
 timer kurmove;
 int kurmovetime = 100;
 int[] nums;
 bool []marknums;
 int numker;
 bool marked;
+menu m;
 sound_pool p;
-
-void main() {
-gameround = 1;
-gamemus.load("sounds/game1.wav");
-tls.load("sounds/titlebit.wav");
-show_window("Asending Match!");
-tls.play_looped();
-speak("press enter to start");
-while (!key_pressed(KEY_RETURN)) 
+void main()
 {
-wait(5);
-}
-p.play_stationary("sounds/titskip.wav",false);
-fade_sound(tls,-30);
-tls.stop();
+show_window("Asending Match!");
+speak("Press enter to start.");
+dlgplay("sounds/TITLEBIT.wav");
 mainmenu();
-gamemus.volume=-10;
-gamemus.pitch=85;
-gamemus.play_looped();
-gamesetup();
-game();
 }
-void gamesetup() {
+void gamesetup()
+{
+gameround = 1;
 nums.resize(0);
 marknums.resize(0);
 if (gameround >= 1 && gameround < 5) {
@@ -55,8 +43,10 @@ marknums.insert_last(false); // all unmarked
 }
 speak("Round " + gameround + ". Numbers to arrange: " + amount + ".");
 }
-void game() {
-while (true) {
+void game()
+{
+while (true)
+{
 wait(5);
 if(key_down(KEY_PAGEUP))
 {
@@ -66,7 +56,6 @@ else if(key_down(KEY_PAGEDOWN))
 {
 gamemus.volume-=0.5;
 }
-
 if (key_pressed(KEY_RIGHT) && kurmove.elapsed >= kurmovetime) {
 if (numker < int(nums.length()) - 1) {
 numker++;
