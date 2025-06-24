@@ -9,7 +9,8 @@ void mainmenu() {
 	m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to choose.";
 	m.click_sound = "sounds/menumove.wav";
 	m.select_sound = "sounds/menupress.wav";
-	m.open_sound = "";
+m.wrap_sound = "sounds/menuwrap.wav";
+
 	m.wrap = true;
 	m.focus_first_item = true;
 
