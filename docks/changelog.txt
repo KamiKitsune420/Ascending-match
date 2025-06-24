@@ -1,0 +1,7 @@
+New in 0.1
+Implemented the main game logic.
+Fixed a bug where it would not speak when marking a number.
+Fixed a bug where marking and unmarking sounds would not play.
+Fixed a bug where marking the second number would trigger both the swap and mark sounds simultaneously, and speak both "Swapped" and "Marked" at the same time.
+Fixed a bug where it would keep the numbers from the previous round instead of removing them from the array.
+Added in-game music. You can change the volume using Page Up and Page Down.

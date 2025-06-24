@@ -1,0 +1,38 @@
+
+string menumusic = "sounds/bitmenu.wav";
+int mms;
+double menumusicvolume = -10;
+sound_pool menupool;
+menu m;
+
+void mainmenu() {
+	m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to choose.";
+	m.click_sound = "sounds/menumove.wav";
+	m.select_sound = "sounds/menupress.wav";
+	m.open_sound = "";
+	m.wrap = true;
+	m.focus_first_item = true;
+
+
+	m.add_item("Play", "p");
+	m.add_item("How to Play", "h");
+	m.add_item("Exit", "x");
+
+	while (true) {
+		int res = m.run();
+
+		if (res == 0) {
+			speak("Starting the game.");
+			break;
+		} else if (res == 1) {
+			sctext("Welcome to Ascending Match. Your goal is to match numbers in ascending order. Use arrow keys to navigate, and enter to select.",30,"sounds/dlgopn.wav","sounds/gamevoice.wav");
+		} else if (res == 2) {
+			speak("Goodbye!");
+
+			exit();
+		} else {
+			menupool.play_stationary("sounds/menuerror.wav", false);
+			speak("Invalid option.");
+		}
+	}
+}
