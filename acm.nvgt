@@ -4,6 +4,8 @@ bool []marknums;
 int gameround;
 int amount;
 int numker;
+timer hint_timer;
+const int HINT_COOLDOWN = 10000; 
 int[] nums;
 sound gamemus;
 menu m;
@@ -41,6 +43,7 @@ for (uint i = 0; i < amount; i++) {
 marknums.insert_last(false); // all unmarked
 }
 speak("Round " + gameround + ". Numbers to arrange: " + amount + ".");
+hint_timer.restart(); // reset hint cooldown every round
 }
 void game()
 {
@@ -133,6 +136,34 @@ game();
 }
 wait(150); // prevent accidental double presses
 }
+if (key_pressed(KEY_H)) {
+    if (hint_timer.elapsed < HINT_COOLDOWN) {
+        int secondsLeft = (HINT_COOLDOWN - hint_timer.elapsed) / 1000;
+        speak("You can't use a hint yet. Please wait " + secondsLeft + " more second" + (secondsLeft == 1 ? "" : "s") + ".");
+        p.play_stationary("sounds/hinterror.wav", false);
+    } else {
+        int correct = 0;
+        int wrong = 0;
+        int[] sorted_nums;
+        for (uint i = 0; i < nums.length(); i++) {
+            sorted_nums.insert_last(nums[i]);
+        }
+        sorted_nums.sort_ascending();
+
+        for (uint i = 0; i < nums.length(); i++) {
+            if (nums[i] == sorted_nums[i]) {
+                correct++;
+            } else {
+                wrong++;
+            }
+        }
+
+        speak(correct + " number" + (correct == 1 ? " is" : "s are") + " in the correct spot. " + wrong + " " + (wrong == 1 ? "is" : " are") + " out of place.");
+        p.play_stationary("sounds/hint.wav", false);
+        hint_timer.restart(); // restart cooldown
+    }
+}
+
 if (key_pressed(KEY_ESCAPE)) {
 fade(gamemus);
 mainmenu();
