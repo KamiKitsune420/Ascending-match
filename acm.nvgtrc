@@ -1,0 +1,49 @@
+# NVGT Configuration for Ascending Match
+# This file controls how your game is named, versioned, and bundled.
+
+[build]
+android_signature_cert = key.keystore
+android_signature_password =AscendingMatch2121
+
+# The friendly name for your application that users will see.
+product_name = Ascending Match
+
+# This is the most important setting for Android. It's a unique ID for your app.
+# It's recommended to use a reverse domain name format.
+
+# IMPORTANT: Replace "yourcompany" with your own unique name or studio name.
+product_identifier = com.RealityBreakerStudios.ascendingmatch
+
+# The human-readable version string for your app.
+product_version = 0.2
+
+# The numeric version code for Android. You should increase this number by 1 for every new release you publish.
+product_version_code = 1
+
+# A semantic version string (major.minor.patch), good practice for Windows/macOS.
+product_version_semantic = 0.2.0
+
+# This tells NVGT what to do after building an Android APK.
+# 0 = do nothing, 1 = ask to install, 2 = always install.
+# 'ask' is a safe and user-friendly default.
+android_install = 1
+
+# This controls how Windows builds are bundled.
+# 0 = just the .exe, 1 = a folder, 2 = a .zip file
+# A .zip file is great for easy distribution.
+windows_bundle = 2
+
+[application]
+# This makes error/info messages appear in GUI dialogs instead of a console window,
+# which is better for a distributed game.
+
+GUI
+
+# This prevents the "Compilation successful" message from showing in the console,
+# giving a cleaner build experience for end-users if they see it.
+quiet
+
+[scripting]
+# This will print any script warnings to the console during compilation but won't stop the build.
+# It's useful for catching potential issues without being too strict.
+compiler_warnings = 0

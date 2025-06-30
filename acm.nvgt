@@ -1,172 +1,332 @@
-#include"includes/*.nvgt"
+#pragma embed"data/sounds.dat"
+#pragma asset docks
+#include"includes/score_system.nvgt"
+#include "includes/touch.nvgt"
+#include "includes/touch_gestures.nvgt"
+#include "includes/form_menu.nvgt"
+#include "includes/sound_pool.nvgt"
+#include "includes/savedata.nvgt" 
+#include"includes/menu.nvgt"
+#include"includes/setupmenu.nvgt"
+#include"includes/speech.nvgt"
+#include"includes/dlgsc.nvgt"
+thread_event g_stop_touch_monitor;
+bool g_is_touch_monitor_running = false;
 bool marked;
 bool []marknums;
 int gameround;
 int amount;
 int numker;
+timer round_timer;
+int round_time_left = 0;
+timer tick_timer;
+sound tick;
 timer hint_timer;
-const int HINT_COOLDOWN = 10000; 
+int HINT_COOLDOWN = 5000; 
 int[] nums;
 sound gamemus;
 menu m;
 sound_pool p;
+bool game_paused = false;
+pack@ g_sound_pack;
+void setup_sound_system() {
+    @g_sound_pack = pack();
+    
+    if (!g_sound_pack.open("data/sounds.dat", PACK_OPEN_MODE_READ)) {
+        alert("Fatal Error", "Could not load sound data. The game will now exit.");
+        exit();
+    }
+    
+    @sound_default_pack = @g_sound_pack;
+}
+
 void main()
 {
-show_window("Asending Match!");
-gameround=1;
-wait(500);
-speak("Press enter to start.");
-dlgplay("sounds/TITLEBIT.wav");
-mainmenu();
+    start_touch_monitor();
+    setup_sound_system();
+if (@touchManager == null)
+{
+@touchManager = touch_gesture_manager();
 }
+
+    show_window("Ascending Match!");
+    #if system_is_mobile
+    show_window("Ascending Match! Android version");
+#endif
+    setup_touch_controls();
+    gameround=1;
+    wait(500);
+    speak("Press enter to start.");
+    #if system_is_mobile
+speak("swipe down with one finger to continue");
+#endif
+    dlgplay("sounds/TITLEBIT.wav");
+    mainmenu();
+}
+
 void gamesetup()
 {
-nums.resize(0);
-marknums.resize(0);
-if (gameround >= 1 && gameround < 5) {
-amount = random(5, 10);        // Easy
+    nums.resize(0);
+    marknums.resize(0);    
+    if (gameround >= 1 && gameround < 5) {
+        amount = random(5, 10);
+    } else if (gameround >= 5 && gameround <= 10) {
+        amount = random(10, 15);
+    } else if (gameround > 10 && gameround < 20) {
+        amount = random(15, 25);
+    } else {
+        amount = random(30, 50);
+    }
+    for (int i = 0; i < amount; i++) {
+        int new_num;
+        do {
+            new_num = random(1, 99);
+        } while (nums.find(new_num) != -1);
+        nums.insert_last(new_num);
+    }
+    
+    numker = 0;
+    for (int i = 0; i < amount; i++) {
+        marknums.insert_last(false);
+    }
+    
+    speak("Round " + gameround + ". Numbers to arrange: " + amount + ".");
+    
+    if (gameround <= 6) {
+        round_time_left = 120;
+    } else if (gameround <= 12) {
+        round_time_left = 90;
+    } else if (gameround <= 20) {
+        round_time_left = 60;
+    } else {
+        round_time_left = 45;
+    }
+
+    round_timer.restart();
+    tick_timer.restart();
+    tick.load("sounds/clock.wav");
 }
-else if (gameround >= 5 && gameround <= 10) {
-amount = random(10, 15);       // Medium
-}
-else if (gameround > 10 && gameround < 20) {
-amount = random(15, 25);       // Harder
-}
-else {
-amount = random(30, 50);       // Very hard
-}
-for (int i = 0; i < amount; i++) {
-nums.insert_last(random(1, 99));
-}
-numker = 0;
-for (uint i = 0; i < amount; i++) {
-marknums.insert_last(false); // all unmarked
-}
-speak("Round " + gameround + ". Numbers to arrange: " + amount + ".");
-hint_timer.restart(); // reset hint cooldown every round
-}
+
 void game()
 {
-while (true)
-{
-wait(5);
-if(key_down(KEY_PAGEUP))
-{
-gamemus.volume+=0.5;
-}
-else if(key_down(KEY_PAGEDOWN))
-{
-gamemus.volume-=0.5;
-}
-if (key_repeating(KEY_RIGHT)) {
-if (numker < int(nums.length()) - 1) {
-numker++;
-p.play_stationary("sounds/curmove.wav", false);
-if (marknums[numker]) {
-    speak(nums[numker] + " (Marked)");
-} else {
-    speak(nums[numker]);
-}
-} else {
-p.play_stationary("sounds/edge.wav", false);
-}
-}
-if (key_repeating(KEY_LEFT)) {
-if (numker > 0) {
-numker--;
-p.play_stationary("sounds/curmove.wav", false);
-if (marknums[numker]) {
-    speak(nums[numker] + " (Marked)");
-} else {
-    speak(nums[numker]);
-}
-} else {
-p.play_stationary("sounds/edge.wav", false);
-}
-}
-if (key_repeating(KEY_SPACE)) {
-marknums[numker] = !marknums[numker];
-int count = 0;
-int first = -1, second = -1;
-for (int i = 0; i < int(marknums.length()); i++) {
-    if (marknums[i]) {
-        count++;
-        if (first == -1)
-            first = i;
-        else
-            second = i;
-    }
-}
-// Swap if 2 are marked
-if (count == 2) {
-    int temp = nums[first];
-    nums[first] = nums[second];
-    nums[second] = temp;
-    p.play_stationary("sounds/swap.wav", false);
-speak("Swapped");
-// Clear all marks
-for (int i = 0; i < int(marknums.length()); i++)
-    marknums[i] = false;
-// Check if sorted
-bool sorted = true;
-for (int i = 0; i < int(nums.length()) - 1; i++) {
-    if (nums[i] > nums[i + 1]) {
-        sorted = false;
-        break;
-    }
-}
-if (sorted) {
-    p.play_stationary("sounds/NEXTROUND.wav", false); // optional
-    speak("Round complete!");
-    wait(1000);
-    gameround++;
-gamemus.pitch+=1;
-    gamesetup(); // repopulates everything
-game();
-    return; // restart game loop from new round
-}
-} else {
-    if (marknums[numker]) {
-        p.play_stationary("sounds/marked.wav", false);
-        speak("Marked");
-    } else {
-        p.play_stationary("sounds/unmarked.wav", false);
-        speak("Unmarked");
-    }
-}
-wait(150); // prevent accidental double presses
-}
-if (key_pressed(KEY_H)) {
-    if (hint_timer.elapsed < HINT_COOLDOWN) {
-        int secondsLeft = (HINT_COOLDOWN - hint_timer.elapsed) / 1000;
-        speak("You can't use a hint yet. Please wait " + secondsLeft + " more second" + (secondsLeft == 1 ? "" : "s") + ".");
-        p.play_stationary("sounds/hinterror.wav", false);
-    } else {
-        int correct = 0;
-        int wrong = 0;
-        int[] sorted_nums;
-        for (uint i = 0; i < nums.length(); i++) {
-            sorted_nums.insert_last(nums[i]);
-        }
-        sorted_nums.sort_ascending();
-
-        for (uint i = 0; i < nums.length(); i++) {
-            if (nums[i] == sorted_nums[i]) {
-                correct++;
+    while (true)
+    {
+        wait(5);
+                #if system_is_mobile
+            if (@touchManager != null) {
+                touchManager.monitor();
+            }
+        #endif
+        
+        if (key_pressed(KEY_P)) {
+            game_paused = !game_paused;
+            if (game_paused) {
+                gamemus.pause();
+                speak("Game paused.");
             } else {
-                wrong++;
+                gamemus.play();
+                speak("Game resumed.");
+            }
+        }
+        
+        if (game_paused) {
+            continue;
+        }
+
+        if (tick_timer.elapsed >= 1000) {
+            round_time_left--;
+            tick_timer.restart();
+
+            if (round_time_left < 21) {
+                tick.play();
+            }
+
+            if (round_time_left <= 0) {
+                gamemus.stop();
+                speak("Time's up. Game over.");
+                p.play_stationary("sounds/gameover.wav", false);
+                add_high_score(gameround);
+                wait(1000);
+                mainmenu();
+                return;
+            }
+        }
+        
+        if(key_down(KEY_PAGEUP)) {
+            gamemus.volume+=0.5;
+        } else if(key_down(KEY_PAGEDOWN)) {
+            gamemus.volume-=0.5;
+        }
+        
+        if (key_repeating(KEY_RIGHT)) {
+            if (numker < int(nums.length()) - 1) {
+                numker++;
+                p.play_stationary("sounds/curmove.wav", false);
+                if (marknums[numker]) {
+                    speak(nums[numker] + " (Marked)");
+                } else {
+                    speak(nums[numker]);
+                }
+            } else {
+                p.play_stationary("sounds/edge.wav", false);
+            }
+        }
+        
+        if (key_repeating(KEY_LEFT)) {
+            if (numker > 0) {
+                numker--;
+                p.play_stationary("sounds/curmove.wav", false);
+                if (marknums[numker]) {
+                    speak(nums[numker] + " (Marked)");
+                } else {
+                    speak(nums[numker]);
+                }
+            } else {
+                p.play_stationary("sounds/edge.wav", false);
+            }
+        }
+        
+        if (key_repeating(KEY_SPACE)) {
+            marknums[numker] = !marknums[numker];
+            int count = 0;
+            int first = -1, second = -1;
+            for (int i = 0; i < int(marknums.length()); i++) {
+                if (marknums[i]) {
+                    count++;
+                    if (first == -1)
+                        first = i;
+                    else
+                        second = i;
+                }
+            }
+            if (count == 2) {
+                int temp = nums[first];
+                nums[first] = nums[second];
+                nums[second] = temp;
+                p.play_stationary("sounds/swap.wav", false);
+                speak("Swapped");
+                for (int i = 0; i < int(marknums.length()); i++)
+                    marknums[i] = false;
+                bool sorted = true;
+                for (int i = 0; i < int(nums.length()) - 1; i++) {
+                    if (nums[i] > nums[i + 1]) {
+                        sorted = false;
+                        break;
+                    }
+                }
+                if (sorted) {
+                    p.play_stationary("sounds/NEXTROUND.wav", false);
+                    speak("Round complete!");
+                    wait(1000);
+                    gameround++;
+                    gamemus.pitch+=1;
+                    gamesetup();
+                    game();
+                    return;
+                }
+            } else {
+                if (marknums[numker]) {
+                    p.play_stationary("sounds/marked.wav", false);
+                    speak("Marked");
+                } else {
+                    p.play_stationary("sounds/unmarked.wav", false);
+                    speak("Unmarked");
+                }
+            }
+            wait(150);
+        }        
+        if (key_pressed(KEY_H)) {
+            if (hint_timer.elapsed < HINT_COOLDOWN) {
+                int secondsLeft = (HINT_COOLDOWN - hint_timer.elapsed) / 1000;
+                speak("You can't use a hint yet. Please wait " + secondsLeft + " more second" + (secondsLeft == 1 ? "" : "s") + ".");
+                p.play_stationary("sounds/hinterror.wav", false);
+            } else {
+                int correct = 0;
+                int wrong = 0;
+                int[] sorted_nums;
+                for (uint i = 0; i < nums.length(); i++) {
+                    sorted_nums.insert_last(nums[i]);
+                }
+                sorted_nums.sort_ascending();
+
+                for (uint i = 0; i < nums.length(); i++) {
+                    if (nums[i] == sorted_nums[i]) {
+                        correct++;
+                    } else {
+                        wrong++;
+                    }
+                }
+
+                speak(correct + " number" + (correct == 1 ? " is" : "s are") + " in the correct spot. " + wrong + " " + (wrong == 1 ? "is" : " are") + " out of place.");
+                p.play_stationary("sounds/hint.wav", false);
+                
+                hint_timer.restart(); 
+            }
+        }
+        
+        if (key_pressed(KEY_T)) {
+            if (round_time_left >= 60) {
+                int minutes = round_time_left / 60;
+                int seconds = round_time_left % 60;
+                speak(minutes + " minute" + (minutes == 1 ? "" : "s") + " and " + seconds + " second" + (seconds == 1 ? "" : "s") + " remaining.");
+            } else {
+                speak(round_time_left + " second" + (round_time_left == 1 ? "" : "s") + " remaining.");
             }
         }
 
-        speak(correct + " number" + (correct == 1 ? " is" : "s are") + " in the correct spot. " + wrong + " " + (wrong == 1 ? "is" : " are") + " out of place.");
-        p.play_stationary("sounds/hint.wav", false);
-        hint_timer.restart(); // restart cooldown
+        if (key_pressed(KEY_ESCAPE)) {
+            fade(gamemus);
+            mainmenu();
+        }
     }
 }
+touch_gesture_manager@ touchManager;
+void setup_touch_controls() {
+    #if system_is_mobile
+        @touchManager = touch_gesture_manager();
+    
+        dictionary@ keymap = dictionary();
+    
+        keymap.set("tap1f", KEY_RETURN);
+        keymap.set("swipe_left1f", KEY_LEFT);
+        keymap.set("swipe_right1f", KEY_RIGHT);
+        keymap.set("double_tap1f", KEY_SPACE);
+        keymap.set("swipe_up1f", KEY_T);    
+        keymap.set("double_tap2f", KEY_H);
+        keymap.set("swipe_left2f", KEY_ESCAPE);
+    
+        keymap.set("double_tap3f", KEY_P);
+    
+        touch_keyboard_interface@ kbi = touch_keyboard_interface(touchManager, keymap);
+    
+        touchManager.add_touch_interface(kbi);
+    #endif
+}
+void touch_monitor_thread() {
+    #if system_is_mobile
+        if (@touchManager == null) return;
+        
+        while(!g_stop_touch_monitor.try_wait(5)) {
+            touchManager.monitor();
+        }
+    #endif
+}
 
-if (key_pressed(KEY_ESCAPE)) {
-fade(gamemus);
-mainmenu();
+void start_touch_monitor() {
+    #if system_is_mobile
+        if (g_is_touch_monitor_running) return;
+
+        g_stop_touch_monitor.reset();
+        async<void>(touch_monitor_thread);
+        g_is_touch_monitor_running = true;
+    #endif
 }
-}
+
+void stop_touch_monitor() {
+    #if system_is_mobile
+        if (!g_is_touch_monitor_running) return;
+
+        g_stop_touch_monitor.set();
+        g_is_touch_monitor_running = false;
+    #endif
 }

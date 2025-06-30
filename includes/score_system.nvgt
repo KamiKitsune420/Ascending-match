@@ -1,0 +1,101 @@
+class ScoreEntry {
+    string name;
+    int score;
+
+    ScoreEntry(string name, int score) {
+        this.name = name;
+        this.score = score;
+    }
+}
+ScoreEntry@[] high_scores;
+const int MAX_SCORES = 20;
+void load_scores() {
+    high_scores.resize(0); // Clear existing scores in memory
+
+    // Use the new savedata class
+    savedata sd("highscores.dat"); 
+    // The load method will handle file reading and deserialization.
+    sd.load(); 
+
+    // Read the number of scores from the loaded data.
+    int score_count = sd.readn("score_count");
+
+    // Loop through and reconstruct the ScoreEntry objects.
+    for (int i = 1; i <= score_count; i++) {
+        string name = sd.read("score_name_" + i);
+        int score = sd.readn("score_value_" + i);
+        high_scores.insert_last(ScoreEntry(name, score));
+    }
+}
+void save_scores() {
+    // Use the new savedata class
+    savedata sd("highscores.dat");
+
+    // Add all the scores from the in-memory array to the class's dictionary.
+    sd.add("score_count", high_scores.length());
+    for (uint i = 0; i < high_scores.length(); i++) {
+        sd.add("score_name_" + (i + 1), high_scores[i].name);
+        sd.add("score_value_" + (i + 1), high_scores[i].score);
+    }
+    
+    // The save method handles serialization and writing the file.
+    sd.save();
+}
+
+void add_high_score(int final_round) {
+    // A score is "high" if the board isn't full, or if it's higher than the lowest score on the board.
+    if (high_scores.length() < MAX_SCORES || final_round > high_scores[high_scores.length() - 1].score) {
+        p.play_stationary("sounds/highscore.wav", false); // Optional sound
+        string name = input_box("New High Score!", "You reached round " + final_round + "! Please enter your name:", "Player");
+        if (name.empty()) {
+            name = "Player";
+        }
+
+        // Add the new score
+        high_scores.insert_last(ScoreEntry(name, final_round));
+
+        // Sort the scores in descending order (bubble sort is fine for a small list)
+        for (uint i = 0; i < high_scores.length() - 1; i++) {
+            for (uint j = 0; j < high_scores.length() - i - 1; j++) {
+                if (high_scores[j].score < high_scores[j + 1].score) {
+                    // Swap
+                    ScoreEntry@ temp = high_scores[j];
+                    @high_scores[j] = @high_scores[j + 1];
+                    @high_scores[j + 1] = @temp;
+                }
+            }
+        }
+
+        // Keep only the top scores
+        if (high_scores.length() > MAX_SCORES) {
+            high_scores.resize(MAX_SCORES);
+        }
+
+        save_scores();
+        show_scores(); // Show the updated board
+    }
+}
+void show_scores() {
+    menu score_menu;
+setupmenu();
+    score_menu.intro_text = "High Scores";
+
+    if (high_scores.length() == 0) {
+        score_menu.add_item("No scores have been recorded yet.");
+    } else {
+        for (uint i = 0; i < high_scores.length(); i++) {
+            string entry = (i + 1) + ". " + high_scores[i].name + " - Round " + high_scores[i].score;
+            score_menu.add_item(entry);
+        }
+    }
+    score_menu.focus_first_item = true;
+    score_menu.intro();
+    
+    while(true) {
+        wait(5);
+        if (key_pressed(KEY_ESCAPE) || key_pressed(KEY_RETURN)) {
+mainmenu();
+            break;
+        }
+    }
+}
