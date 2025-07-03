@@ -53,6 +53,7 @@ if (@touchManager == null)
 }
 
     show_window("Ascending Match!");
+readpreffs();
     #if system_is_mobile
     show_window("Ascending Match! Android version");
 #endif
