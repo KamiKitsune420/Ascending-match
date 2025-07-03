@@ -9,6 +9,7 @@
 #include"includes/menu.nvgt"
 #include"includes/setupmenu.nvgt"
 #include"includes/speech.nvgt"
+#include"includes/savefuncks.nvgt"
 #include"includes/dlgsc.nvgt"
 thread_event g_stop_touch_monitor;
 bool g_is_touch_monitor_running = false;
@@ -19,6 +20,8 @@ int amount;
 int numker;
 timer round_timer;
 int round_time_left = 0;
+    savedata sd("data/highscores.dat"); 
+savedata st("data/settings.dat");
 timer tick_timer;
 sound tick;
 timer hint_timer;

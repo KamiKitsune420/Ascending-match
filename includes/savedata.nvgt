@@ -1,3 +1,7 @@
+/*
+This class was made by Mason, with modifications made by me to include the reading and saving of boolion variables. I also changed the wording a bit on some of the functions.
+*/
+
 //savedata class.
 //by Ultrocity Audio
 class savedata
@@ -44,15 +48,63 @@ f.write(serialize(d));
 else
 f.write(string_encrypt(serialize(d),key));
 }
+//overloaded function of add to add a boolion.
+void add(string name, bool value)
+{
+d.set(name,value);
+}
+//function to read a boolion.
+bool read_bool(string name)
+{
+bool tmp;
+d.get(name,tmp);
+return tmp;
+}
 //function to add a value.
 void add(string name, double value)
 {
 d.set(name,value);
 }
 //function to read a number.
-double readn(string name)
+double read_double(string name)
 {
 double tmp;
+d.get(name,tmp);
+return tmp;
+}
+//function to add a value.
+void add(string name, float value)
+{
+d.set(name,value);
+}
+//function to read a number.
+float read_float(string name)
+{
+float tmp;
+d.get(name,tmp);
+return tmp;
+}
+//function to add a value.
+void add(string name, int value)
+{
+d.set(name,value);
+}
+//function to read a number.
+int read_int(string name)
+{
+int tmp;
+d.get(name,tmp);
+return tmp;
+}
+//function to add a value.
+void add(string name, int64 value)
+{
+d.set(name,value);
+}
+//function to read a number.
+int read_int64(string name)
+{
+int64 tmp;
 d.get(name,tmp);
 return tmp;
 }
@@ -62,7 +114,7 @@ void add(string name, string value)
 d.set(name,value);
 }
 //function to read a string
-string read(string name)
+string read_string(string name)
 {
 string tmp;
 d.get(name,tmp);

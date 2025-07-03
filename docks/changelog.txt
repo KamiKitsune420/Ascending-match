@@ -1,4 +1,5 @@
 New in 0.2
+The game will now save menu music volume.
 the game now has an android version
 fixed saving of the local scoreboard
 attempted to add a local scoreboard. does not seam to save properly
