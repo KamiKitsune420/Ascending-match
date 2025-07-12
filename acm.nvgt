@@ -121,7 +121,33 @@ void game()
                 touchManager.monitor();
             }
         #endif
-        
+                if (key_repeating(KEY_HOME)) {
+            if (nums.length() > 0) {
+                numker = 0;
+                p.play_stationary("sounds/curmove.wav", false);
+                if (marknums[numker]) {
+                    speak("Beginning: " + nums[numker] + " (Marked)");
+                } else {
+                    speak("Beginning: " + nums[numker]);
+                }
+            } else {
+                p.play_stationary("sounds/edge.wav", false);
+            }
+        }
+
+        if (key_repeating(KEY_END)) {
+            if (nums.length() > 0) {
+                numker = int(nums.length()) - 1;
+                p.play_stationary("sounds/curmove.wav", false);
+                if (marknums[numker]) {
+                    speak("End: " + nums[numker] + " (Marked)");
+                } else {
+                    speak("End: " + nums[numker]);
+                }
+            } else {
+                p.play_stationary("sounds/edge.wav", false);
+            }
+        }
         if (key_pressed(KEY_P)) {
             game_paused = !game_paused;
             if (game_paused) {
