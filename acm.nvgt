@@ -154,7 +154,7 @@ void game()
                 gamemus.pause();
                 speak("Game paused.");
             } else {
-                gamemus.play();
+                gamemus.play_looped();
                 speak("Game resumed.");
             }
         }
