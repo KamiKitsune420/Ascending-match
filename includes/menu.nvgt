@@ -12,7 +12,6 @@ if(mres==-1)
 {
 speak("exiting");
 m.fade_music();
-    stop_touch_monitor();
 exit();
 }
 if (main == "pl")
@@ -41,7 +40,6 @@ if (main == "ex")
 {
 speak("exiting");
 m.fade_music();
-    stop_touch_monitor();
 exit();
 }
 }

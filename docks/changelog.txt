@@ -1,4 +1,5 @@
 New in 0.2
+Removed android support, do to some bugs that can't be fixed at the moment.
 Fixed a bug where the music would not loop after resuming the game
 added home and end to move to the start and end of the list
 The game will now save menu music volume.

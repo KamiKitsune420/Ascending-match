@@ -1,8 +1,6 @@
 #pragma embed"data/sounds.dat"
 #pragma asset docks
 #include"includes/score_system.nvgt"
-#include "includes/touch.nvgt"
-#include "includes/touch_gestures.nvgt"
 #include "includes/form_menu.nvgt"
 #include "includes/sound_pool.nvgt"
 #include "includes/savedata.nvgt" 
@@ -11,8 +9,6 @@
 #include"includes/speech.nvgt"
 #include"includes/savefuncks.nvgt"
 #include"includes/dlgsc.nvgt"
-thread_event g_stop_touch_monitor;
-bool g_is_touch_monitor_running = false;
 bool marked;
 bool []marknums;
 int gameround;
@@ -45,29 +41,15 @@ void setup_sound_system() {
 
 void main()
 {
-    start_touch_monitor();
     setup_sound_system();
-if (@touchManager == null)
-{
-@touchManager = touch_gesture_manager();
-}
-
     show_window("Ascending Match!");
 readpreffs();
-    #if system_is_mobile
-    show_window("Ascending Match! Android version");
-#endif
-    setup_touch_controls();
     gameround=1;
     wait(500);
     speak("Press enter to start.");
-    #if system_is_mobile
-speak("swipe down with one finger to continue");
-#endif
     dlgplay("sounds/TITLEBIT.wav");
     mainmenu();
 }
-
 void gamesetup()
 {
     nums.resize(0);
@@ -95,7 +77,7 @@ void gamesetup()
     }
     
     speak("Round " + gameround + ". Numbers to arrange: " + amount + ".");
-    
+   
     if (gameround <= 6) {
         round_time_left = 120;
     } else if (gameround <= 12) {
@@ -116,19 +98,14 @@ void game()
     while (true)
     {
         wait(5);
-                #if system_is_mobile
-            if (@touchManager != null) {
-                touchManager.monitor();
-            }
-        #endif
                 if (key_repeating(KEY_HOME)) {
             if (nums.length() > 0) {
                 numker = 0;
                 p.play_stationary("sounds/curmove.wav", false);
                 if (marknums[numker]) {
-                    speak("Beginning: " + nums[numker] + " (Marked)");
+                    speak(nums[numker] + " (Marked)");
                 } else {
-                    speak("Beginning: " + nums[numker]);
+                    speak(nums[numker]);
                 }
             } else {
                 p.play_stationary("sounds/edge.wav", false);
@@ -140,9 +117,9 @@ void game()
                 numker = int(nums.length()) - 1;
                 p.play_stationary("sounds/curmove.wav", false);
                 if (marknums[numker]) {
-                    speak("End: " + nums[numker] + " (Marked)");
+                    speak(nums[numker] + " (Marked)");
                 } else {
-                    speak("End: " + nums[numker]);
+                    speak(nums[numker]);
                 }
             } else {
                 p.play_stationary("sounds/edge.wav", false);
@@ -309,54 +286,4 @@ void game()
             mainmenu();
         }
     }
-}
-touch_gesture_manager@ touchManager;
-void setup_touch_controls() {
-    #if system_is_mobile
-        @touchManager = touch_gesture_manager();
-    
-        dictionary@ keymap = dictionary();
-    
-        keymap.set("tap1f", KEY_RETURN);
-        keymap.set("swipe_left1f", KEY_LEFT);
-        keymap.set("swipe_right1f", KEY_RIGHT);
-        keymap.set("double_tap1f", KEY_SPACE);
-        keymap.set("swipe_up1f", KEY_T);    
-        keymap.set("double_tap2f", KEY_H);
-        keymap.set("swipe_left2f", KEY_ESCAPE);
-    
-        keymap.set("double_tap3f", KEY_P);
-    
-        touch_keyboard_interface@ kbi = touch_keyboard_interface(touchManager, keymap);
-    
-        touchManager.add_touch_interface(kbi);
-    #endif
-}
-void touch_monitor_thread() {
-    #if system_is_mobile
-        if (@touchManager == null) return;
-        
-        while(!g_stop_touch_monitor.try_wait(5)) {
-            touchManager.monitor();
-        }
-    #endif
-}
-
-void start_touch_monitor() {
-    #if system_is_mobile
-        if (g_is_touch_monitor_running) return;
-
-        g_stop_touch_monitor.reset();
-        async<void>(touch_monitor_thread);
-        g_is_touch_monitor_running = true;
-    #endif
-}
-
-void stop_touch_monitor() {
-    #if system_is_mobile
-        if (!g_is_touch_monitor_running) return;
-
-        g_stop_touch_monitor.set();
-        g_is_touch_monitor_running = false;
-    #endif
 }
