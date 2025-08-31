@@ -1,4 +1,6 @@
-New in 0.2
+New in 0.3.
+Removed the scoreboard system, as it needs to be recoded.
+New in 0.2.
 Removed android support, do to some bugs that can't be fixed at the moment.
 Fixed a bug where the music would not loop after resuming the game
 added home and end to move to the start and end of the list
@@ -9,7 +11,7 @@ attempted to add a local scoreboard. does not seam to save properly
 added the ability to pause the game. for this, use p
 attempted to fix the hint bugs. needs further testing.
 The game no longer adds duplicate numbers to the list.
-New in 0.1
+New in 0.1.
 Added the game clock. needs testing for bugs
 Decreased the cooldown for displaying hints when pressing the letter H key.
 Fixed a bug where the game round number would go back to 1 upon successful matches.

@@ -1,6 +1,5 @@
 #pragma embed"data/sounds.dat"
 #pragma asset docks
-#include"includes/score_system.nvgt"
 #include "includes/form_menu.nvgt"
 #include "includes/sound_pool.nvgt"
 #include "includes/savedata.nvgt" 
@@ -14,6 +13,7 @@ bool []marknums;
 int gameround;
 int amount;
 int numker;
+string version="0.3";
 timer round_timer;
 int round_time_left = 0;
     savedata sd("data/highscores.dat"); 
@@ -31,7 +31,7 @@ void main()
 {
 set_sound_storage("*");
 set_sound_decryption_key("7nVhy4oVp5LEOZBWXhODm2hI56zSUohj4FzQPhpJNQKd8iR6N2D87WmmNketbe0gArbFEP9TAlhmlRv9bqfI4ip6pRz0na4Zf5y3pBbsMaqDStP1fYY3LPESaJ4s80EtP5scps6ktY0Fh53Dkj3zZZce5N6iQXx9dOqrwYuQcds9awWhDVWkUXzj93KUXSCPnGB3InJeINNDZvdl0yxRBwqzb49NYq8LrWSFne5tWXRNWtvwgPiuiHRw4VcX2G8C8ytbiWyFbp2Ht2Geukp0ZyAicxRLaROgLJIOVLIO1RTHhEA2IviNlR6rDifLVdKQP0Ou3OvkyoT3WpLTIFNwET6hvi04DS42ABb6TBKeu5OOX75cKlvOTnaE1sDCujpeIPMXHMFbS82e9DEbc0J5wFyfPcLLyJdRupnJESCY9LpahC5CF9OuMkl3md4LgoXPvpQhqJNb1eyyQkagTcsMnXpGA4grFAiSXORm",true);
-    show_window("Ascending Match!");
+    show_window("AscendingMatch, version "+version);
 readpreffs();
     gameround=1;
     wait(500);
@@ -141,13 +141,10 @@ void game()
                 gamemus.stop();
                 speak("Time's up. Game over.");
                 p.play_stationary("gameover.wav", false);
-                add_high_score(gameround);
                 wait(1000);
                 mainmenu();
-                return;
             }
-        }
-        
+        }        
         if(key_down(KEY_PAGEUP)) {
             gamemus.volume+=0.5;
         } else if(key_down(KEY_PAGEDOWN)) {
@@ -211,7 +208,7 @@ void game()
                     }
                 }
                 if (sorted) {
-                    p.play_stationary("NEXTROUND.wav", false);
+                    p.play_stationary("nextround.wav", false);
                     speak("Round complete!");
                     wait(1000);
                     gameround++;

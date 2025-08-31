@@ -3,7 +3,6 @@ void mainmenu()
 setupmenu();
 m.add_item("Play", "pl");
 m.add_item("How to Play", "hp");
-m.add_item("View Local High Scores","hg");
 m.add_item("Exit", "ex");
 m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to choose.";
 int mres = m.run();
@@ -31,10 +30,6 @@ speak("loading");
 m.fade_music();
 sctext("Welcome to Ascending Match. Your goal is to match numbers in ascending order. Use arrow keys to navigate, and enter to select.",30,"dlgopn.wav","gamevoice.wav");
 mainmenu();
-}
-if(main=="hg")
-{
-show_scores();
 }
 if (main == "ex")
 {
