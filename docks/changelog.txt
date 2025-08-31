@@ -20,4 +20,3 @@ Fixed a bug where marking the second number would trigger both the swap and mark
 Fixed a bug where it would keep the numbers from the previous round instead of removing them from the array.
 Added in-game music. You can change the volume using Page Up and Page Down.
 ADDED H TO CHECK WHAT NUMBERS ARE IN ORDER
-Implemented the main game logic.

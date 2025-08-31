@@ -18,7 +18,7 @@ if (main == "pl")
 {
 speak("loading");
 m.fade_music();
-gamemus.load("sounds/game1.wav");
+gamemus.load("game1.wav");
 gamemus.volume=-15;
 gamemus.pitch=85;
 gamemus.play_looped();
@@ -29,7 +29,7 @@ if (main == "hp")
 {
 speak("loading");
 m.fade_music();
-sctext("Welcome to Ascending Match. Your goal is to match numbers in ascending order. Use arrow keys to navigate, and enter to select.",30,"sounds/dlgopn.wav","sounds/gamevoice.wav");
+sctext("Welcome to Ascending Match. Your goal is to match numbers in ascending order. Use arrow keys to navigate, and enter to select.",30,"dlgopn.wav","gamevoice.wav");
 mainmenu();
 }
 if(main=="hg")

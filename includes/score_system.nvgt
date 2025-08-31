@@ -42,7 +42,7 @@ void save_scores() {
 void add_high_score(int final_round) {
     // A score is "high" if the board isn't full, or if it's higher than the lowest score on the board.
     if (high_scores.length() < MAX_SCORES || final_round > high_scores[high_scores.length() - 1].score) {
-        p.play_stationary("sounds/highscore.wav", false); // Optional sound
+        p.play_stationary("highscore.wav", false); // Optional sound
         string name = input_box("New High Score!", "You reached round " + final_round + "! Please enter your name:", name);
         if (name.empty()) {
             name = name;

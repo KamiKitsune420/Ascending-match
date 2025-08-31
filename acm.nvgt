@@ -27,27 +27,16 @@ sound gamemus;
 menu m;
 sound_pool p;
 bool game_paused = false;
-pack@ g_sound_pack;
-void setup_sound_system() {
-    @g_sound_pack = pack();
-    
-    if (!g_sound_pack.open("data/sounds.dat", PACK_OPEN_MODE_READ)) {
-        alert("Fatal Error", "Could not load sound data. The game will now exit.");
-        exit();
-    }
-    
-    @sound_default_pack = @g_sound_pack;
-}
-
 void main()
 {
-    setup_sound_system();
+set_sound_storage("*");
+set_sound_decryption_key("7nVhy4oVp5LEOZBWXhODm2hI56zSUohj4FzQPhpJNQKd8iR6N2D87WmmNketbe0gArbFEP9TAlhmlRv9bqfI4ip6pRz0na4Zf5y3pBbsMaqDStP1fYY3LPESaJ4s80EtP5scps6ktY0Fh53Dkj3zZZce5N6iQXx9dOqrwYuQcds9awWhDVWkUXzj93KUXSCPnGB3InJeINNDZvdl0yxRBwqzb49NYq8LrWSFne5tWXRNWtvwgPiuiHRw4VcX2G8C8ytbiWyFbp2Ht2Geukp0ZyAicxRLaROgLJIOVLIO1RTHhEA2IviNlR6rDifLVdKQP0Ou3OvkyoT3WpLTIFNwET6hvi04DS42ABb6TBKeu5OOX75cKlvOTnaE1sDCujpeIPMXHMFbS82e9DEbc0J5wFyfPcLLyJdRupnJESCY9LpahC5CF9OuMkl3md4LgoXPvpQhqJNb1eyyQkagTcsMnXpGA4grFAiSXORm",true);
     show_window("Ascending Match!");
 readpreffs();
     gameround=1;
     wait(500);
     speak("Press enter to start.");
-    dlgplay("sounds/TITLEBIT.wav");
+    dlgplay("TITLEBIT.wav");
     mainmenu();
 }
 void gamesetup()
@@ -90,7 +79,7 @@ void gamesetup()
 
     round_timer.restart();
     tick_timer.restart();
-    tick.load("sounds/clock.wav");
+    tick.load("clock.wav");
 }
 
 void game()
@@ -101,28 +90,28 @@ void game()
                 if (key_repeating(KEY_HOME)) {
             if (nums.length() > 0) {
                 numker = 0;
-                p.play_stationary("sounds/curmove.wav", false);
+                p.play_stationary("curmove.wav", false);
                 if (marknums[numker]) {
                     speak(nums[numker] + " (Marked)");
                 } else {
                     speak(nums[numker]);
                 }
             } else {
-                p.play_stationary("sounds/edge.wav", false);
+                p.play_stationary("edge.wav", false);
             }
         }
 
         if (key_repeating(KEY_END)) {
             if (nums.length() > 0) {
                 numker = int(nums.length()) - 1;
-                p.play_stationary("sounds/curmove.wav", false);
+                p.play_stationary("curmove.wav", false);
                 if (marknums[numker]) {
                     speak(nums[numker] + " (Marked)");
                 } else {
                     speak(nums[numker]);
                 }
             } else {
-                p.play_stationary("sounds/edge.wav", false);
+                p.play_stationary("edge.wav", false);
             }
         }
         if (key_pressed(KEY_P)) {
@@ -151,7 +140,7 @@ void game()
             if (round_time_left <= 0) {
                 gamemus.stop();
                 speak("Time's up. Game over.");
-                p.play_stationary("sounds/gameover.wav", false);
+                p.play_stationary("gameover.wav", false);
                 add_high_score(gameround);
                 wait(1000);
                 mainmenu();
@@ -168,28 +157,28 @@ void game()
         if (key_repeating(KEY_RIGHT)) {
             if (numker < int(nums.length()) - 1) {
                 numker++;
-                p.play_stationary("sounds/curmove.wav", false);
+                p.play_stationary("curmove.wav", false);
                 if (marknums[numker]) {
                     speak(nums[numker] + " (Marked)");
                 } else {
                     speak(nums[numker]);
                 }
             } else {
-                p.play_stationary("sounds/edge.wav", false);
+                p.play_stationary("edge.wav", false);
             }
         }
         
         if (key_repeating(KEY_LEFT)) {
             if (numker > 0) {
                 numker--;
-                p.play_stationary("sounds/curmove.wav", false);
+                p.play_stationary("curmove.wav", false);
                 if (marknums[numker]) {
                     speak(nums[numker] + " (Marked)");
                 } else {
                     speak(nums[numker]);
                 }
             } else {
-                p.play_stationary("sounds/edge.wav", false);
+                p.play_stationary("edge.wav", false);
             }
         }
         
@@ -210,7 +199,7 @@ void game()
                 int temp = nums[first];
                 nums[first] = nums[second];
                 nums[second] = temp;
-                p.play_stationary("sounds/swap.wav", false);
+                p.play_stationary("swap.wav", false);
                 speak("Swapped");
                 for (int i = 0; i < int(marknums.length()); i++)
                     marknums[i] = false;
@@ -222,7 +211,7 @@ void game()
                     }
                 }
                 if (sorted) {
-                    p.play_stationary("sounds/NEXTROUND.wav", false);
+                    p.play_stationary("NEXTROUND.wav", false);
                     speak("Round complete!");
                     wait(1000);
                     gameround++;
@@ -233,10 +222,10 @@ void game()
                 }
             } else {
                 if (marknums[numker]) {
-                    p.play_stationary("sounds/marked.wav", false);
+                    p.play_stationary("marked.wav", false);
                     speak("Marked");
                 } else {
-                    p.play_stationary("sounds/unmarked.wav", false);
+                    p.play_stationary("unmarked.wav", false);
                     speak("Unmarked");
                 }
             }
@@ -246,7 +235,7 @@ void game()
             if (hint_timer.elapsed < HINT_COOLDOWN) {
                 int secondsLeft = (HINT_COOLDOWN - hint_timer.elapsed) / 1000;
                 speak("You can't use a hint yet. Please wait " + secondsLeft + " more second" + (secondsLeft == 1 ? "" : "s") + ".");
-                p.play_stationary("sounds/hinterror.wav", false);
+                p.play_stationary("hinterror.wav", false);
             } else {
                 int correct = 0;
                 int wrong = 0;
@@ -265,7 +254,7 @@ void game()
                 }
 
                 speak(correct + " number" + (correct == 1 ? " is" : "s are") + " in the correct spot. " + wrong + " " + (wrong == 1 ? "is" : " are") + " out of place.");
-                p.play_stationary("sounds/hint.wav", false);
+                p.play_stationary("hint.wav", false);
                 
                 hint_timer.restart(); 
             }
