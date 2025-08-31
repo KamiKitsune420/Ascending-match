@@ -1,7 +1,7 @@
 New in 0.3.
 Removed the scoreboard system, as it needs to be recoded.
-New in 0.2.
 Removed android support, do to some bugs that can't be fixed at the moment.
+New in 0.2.
 Fixed a bug where the music would not loop after resuming the game
 added home and end to move to the start and end of the list
 The game will now save menu music volume.
@@ -11,8 +11,8 @@ attempted to add a local scoreboard. does not seam to save properly
 added the ability to pause the game. for this, use p
 attempted to fix the hint bugs. needs further testing.
 The game no longer adds duplicate numbers to the list.
-New in 0.1.
 Added the game clock. needs testing for bugs
+New in 0.1.
 Decreased the cooldown for displaying hints when pressing the letter H key.
 Fixed a bug where the game round number would go back to 1 upon successful matches.
 Added menu music and refactored other game related functions.
@@ -22,3 +22,4 @@ Fixed a bug where marking the second number would trigger both the swap and mark
 Fixed a bug where it would keep the numbers from the previous round instead of removing them from the array.
 Added in-game music. You can change the volume using Page Up and Page Down.
 ADDED H TO CHECK WHAT NUMBERS ARE IN ORDER
+Implemented the main game logic.
