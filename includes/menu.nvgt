@@ -2,7 +2,7 @@ void mainmenu()
 {
 setupmenu();
 m.add_item("Play", "pl");
-m.add_item("How to Play", "hp");
+m.add_item("Help", "hp");
 m.add_item("Exit", "ex");
 m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to choose.";
 int mres = m.run();
