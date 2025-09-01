@@ -1,0 +1,232 @@
+class score_entry
+{
+    string player_name;
+    int round_reached;
+    double accuracy_percent;
+    uint64 timestamp;
+    int total_swaps;
+    int correct_swaps;
+    
+    score_entry()
+    {
+        player_name = "";
+        round_reached = 0;
+        accuracy_percent = 0.0;
+        timestamp = 0;
+        total_swaps = 0;
+        correct_swaps = 0;
+    }
+    
+    score_entry(string name, int round, int total, int correct, uint64 time)
+    {
+        player_name = name;
+        round_reached = round;
+        total_swaps = total;
+        correct_swaps = correct;
+        timestamp = time;
+        
+        if (total > 0) {
+            accuracy_percent = (double(correct) / double(total)) * 100.0;
+        } else {
+            accuracy_percent = 0.0;
+        }
+    }
+}
+
+class scoreboard
+{
+    score_entry[] local_scores;
+    savedata@ score_data;
+    
+    scoreboard()
+    {
+        @score_data = savedata("data/scores.dat", "ScoreDataKey2024AscendingMatchLocalHighScores");
+        load_scores();
+    }
+    
+    void add_localscore(string player_name, int round_reached, int total_swaps, int correct_swaps)
+    {
+        uint64 current_time = get_TIME_STAMP();
+        score_entry new_entry(player_name, round_reached, total_swaps, correct_swaps, current_time);
+        
+        local_scores.insert_last(new_entry);
+        
+        // Sort by round reached (descending), then by accuracy (descending)
+        sort_scores();
+        
+        // Keep only top 10 scores
+        if (local_scores.length() > 10) {
+            local_scores.resize(10);
+        }
+        
+        save_scores();
+    }
+    
+    void get_localscores()
+    {
+        if (local_scores.length() == 0) {
+            alert("Local Scores", "No local scores recorded yet!");
+            return;
+        }
+        
+        setupmenu();
+        
+        for (uint i = 0; i < local_scores.length(); i++) {
+            string entry_text = (i + 1) + ": " + local_scores[i].player_name + 
+                              ", made it to round " + local_scores[i].round_reached + 
+                              ", with an accuracy of " + format_float(local_scores[i].accuracy_percent, "", 0, 1) + "%";
+            m.add_item(entry_text, "score_" + i);
+        }
+        
+        m.add_item("Clear all scores", "clear");
+        m.add_item("Return", "return");
+        m.intro_text = "Local high scores. Use your navigation keys to browse the scores.";
+        
+        while (true) {
+            int result = m.run();
+            string selected = m.get_selected_item_id();
+            
+            if (result == -1 || selected == "return") {
+                break;
+            }
+            
+            if (selected == "clear") {
+                if (yes_no("Are you sure you want to clear all local scores?")) {
+                    clear_scores();
+                    speak("All scores cleared.");
+                    break;
+                }
+                continue;
+            }
+            
+            // Show detailed score info
+            if (selected.substr(0, 6) == "score_") {
+                uint index = parse_int(selected.substr(6));
+                if (index < local_scores.length()) {
+                    show_detailed_score(index);
+                }
+            }
+        }
+    }
+    
+    private void show_detailed_score(uint index)
+    {
+        score_entry@ entry = @local_scores[index];
+        string details = "Player: " + entry.player_name + "\n" +
+                        "Round reached: " + entry.round_reached + "\n" +
+                        "Total swaps made: " + entry.total_swaps + "\n" +
+                        "Correct swaps: " + entry.correct_swaps + "\n" +
+                        "Accuracy: " + format_float(entry.accuracy_percent, "", 0, 2) + "%\n" +
+                        "Date achieved: " + format_timestamp(entry.timestamp);
+        
+        info_box("Score Details", "Detailed information for this score:", details);
+    }
+    
+    private string format_timestamp(uint64 timestamp)
+    {
+        // Simple timestamp formatting - you might want to enhance this
+        return "Score #" + timestamp;
+    }
+    
+    private void sort_scores()
+    {
+        // Simple bubble sort by round reached (descending), then accuracy (descending)
+        for (uint i = 0; i < local_scores.length() - 1; i++) {
+            for (uint j = 0; j < local_scores.length() - 1 - i; j++) {
+                bool should_swap = false;
+                
+                // Primary sort: round reached (higher is better)
+                if (local_scores[j].round_reached < local_scores[j + 1].round_reached) {
+                    should_swap = true;
+                } 
+                // Secondary sort: if same round, sort by accuracy (higher is better)
+                else if (local_scores[j].round_reached == local_scores[j + 1].round_reached) {
+                    if (local_scores[j].accuracy_percent < local_scores[j + 1].accuracy_percent) {
+                        should_swap = true;
+                    }
+                }
+                
+                if (should_swap) {
+                    score_entry temp = local_scores[j];
+                    local_scores[j] = local_scores[j + 1];
+                    local_scores[j + 1] = temp;
+                }
+            }
+        }
+    }
+    
+    private void save_scores()
+    {
+        // Save each score entry
+        for (uint i = 0; i < local_scores.length(); i++) {
+            string prefix = "score_" + i + "_";
+            score_data.add(prefix + "name", local_scores[i].player_name);
+            score_data.add(prefix + "round", local_scores[i].round_reached);
+            score_data.add(prefix + "accuracy", local_scores[i].accuracy_percent);
+            score_data.add(prefix + "timestamp", int64(local_scores[i].timestamp));
+            score_data.add(prefix + "total_swaps", local_scores[i].total_swaps);
+            score_data.add(prefix + "correct_swaps", local_scores[i].correct_swaps);
+        }
+        
+        score_data.add("score_count", int(local_scores.length()));
+        score_data.save();
+    }
+    
+    private void load_scores()
+    {
+        score_data.load();
+        
+        if (!score_data.d.exists("score_count")) {
+            return; // No scores saved yet
+        }
+        
+        int count = score_data.read_int("score_count");
+        local_scores.resize(0);
+        
+        for (int i = 0; i < count; i++) {
+            string prefix = "score_" + i + "_";
+            
+            if (score_data.d.exists(prefix + "name")) {
+                score_entry entry;
+                entry.player_name = score_data.read_string(prefix + "name");
+                entry.round_reached = score_data.read_int(prefix + "round");
+                entry.accuracy_percent = score_data.read_double(prefix + "accuracy");
+                entry.timestamp = uint64(score_data.read_int64(prefix + "timestamp"));
+                entry.total_swaps = score_data.read_int(prefix + "total_swaps");
+                entry.correct_swaps = score_data.read_int(prefix + "correct_swaps");
+                
+                local_scores.insert_last(entry);
+            }
+        }
+    }
+    
+    void clear_scores()
+    {
+        local_scores.resize(0);
+        score_data.d.delete_all();
+        score_data.save();
+    }
+    
+    int get_score_count()
+    {
+        return int(local_scores.length());
+    }
+    
+    bool is_high_score(int round_reached, double accuracy)
+    {
+        if (local_scores.length() < 10) {
+            return true; // Always a high score if we have less than 10
+        }
+        
+        // Check if this score would make it into top 10
+        score_entry worst_score = local_scores[local_scores.length() - 1];
+        
+        if (round_reached > worst_score.round_reached) {
+            return true;
+        } else if (round_reached == worst_score.round_reached && accuracy > worst_score.accuracy_percent) {
+            return true;
+        }
+        
+        return false;
+    }
+}

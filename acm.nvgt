@@ -8,6 +8,7 @@
 #include"includes/speech.nvgt"
 #include"includes/savefuncks.nvgt"
 #include"includes/dlgsc.nvgt"
+#include"includes/scoreboard.nvgt"
 bool marked;
 bool []marknums;
 int gameround;
@@ -21,11 +22,193 @@ timer tick_timer;
 sound tick;
 timer hint_timer;
 int HINT_COOLDOWN = 5000; 
-int[] nums;
+double[] nums;
 sound gamemus;
+int gamemus_volume = -15;
+bool stereo_positioning = false;
 menu m;
 sound_pool p;
 bool game_paused = false;
+int total_swaps = 0;
+int correct_swaps = 0;
+scoreboard cb;
+void play_curmove_sound()
+{
+if (stereo_positioning && nums.length() > 1)
+{
+float pan = -100.0 + (200.0 * numker / (nums.length() - 1));
+p.play_stationary_extended("curmove.wav", false, 0, pan, 0.0, 100.0);
+}
+else
+{
+p.play_stationary("curmove.wav", false);
+}
+}
+
+void play_edge_sound()
+{
+if (stereo_positioning && nums.length() > 1)
+{
+float pan = -100.0 + (200.0 * numker / (nums.length() - 1));
+p.play_stationary_extended("edge.wav", false, 0, pan, 0.0, 100.0);
+}
+else
+{
+p.play_stationary("edge.wav", false);
+}
+}
+
+string format_number_for_speech(double num)
+{
+    if (num == floor(num)) {
+        // It's a whole number
+        return "" + int(num);
+    } else {
+        // It's a decimal - format with appropriate precision
+        return format_float(num, "", 0, 2);
+    }
+}
+
+bool is_beneficial_swap(int pos1, int pos2)
+{
+    // Create a sorted copy to compare against
+    double[] sorted_nums;
+    for (uint i = 0; i < nums.length(); i++) {
+        sorted_nums.insert_last(nums[i]);
+    }
+    sorted_nums.sort_ascending();
+    
+    // Check how many positions are correct before the swap
+    int correct_before = 0;
+    for (uint i = 0; i < nums.length(); i++) {
+        if (nums[i] == sorted_nums[i]) {
+            correct_before++;
+        }
+    }
+    
+    // Simulate the swap
+    double temp = nums[pos1];
+    nums[pos1] = nums[pos2];
+    nums[pos2] = temp;
+    
+    // Check how many positions are correct after the swap
+    int correct_after = 0;
+    for (uint i = 0; i < nums.length(); i++) {
+        if (nums[i] == sorted_nums[i]) {
+            correct_after++;
+        }
+    }
+    
+    // Restore original order
+    temp = nums[pos1];
+    nums[pos1] = nums[pos2];
+    nums[pos2] = temp;
+    
+    // Return true if the swap increases the number of correct positions
+    return correct_after > correct_before;
+}
+
+double generate_number_for_round(int round)
+{
+    if (round < 8) {
+        // Rounds 1-7: Simple integers 1-99
+        return double(random(1, 99));
+    } else if (round < 12) {
+        // Rounds 8-11: Decimal numbers 1.0-99.9
+        int whole = random(1, 99);
+        int decimal = random(1, 9);
+        return double(whole) + (double(decimal) / 10.0);
+    } else if (round < 15) {
+        // Rounds 12-14: Mix of positive and negative integers
+        int num = random(1, 99);
+        return random_bool() ? double(num) : double(-num);
+    } else if (round < 20) {
+        // Rounds 15-19: Larger range with negatives (1-999)
+        int num = random(1, 999);
+        return random_bool() ? double(num) : double(-num);
+    } else if (round < 25) {
+        // Rounds 20-24: Mix of integers, decimals, and negatives
+        if (random(1, 3) == 1) {
+            // Integer
+            int num = random(1, 999);
+            return random_bool() ? double(num) : double(-num);
+        } else {
+            // Decimal
+            int whole = random(1, 999);
+            int decimal = random(1, 9);
+            double result = double(whole) + (double(decimal) / 10.0);
+            return random_bool() ? result : -result;
+        }
+    } else {
+        // Round 25+: Close decimal precision challenge
+        int base = random(1, 50);
+        int decimal = random(1, 99);
+        double result = double(base) + (double(decimal) / 100.0);
+        return random_bool() ? result : -result;
+    }
+}
+
+string audio_name_entry()
+{
+    sctext("High score achieved! Time to enter your name.", 40, "dlgopn.wav", "gamevoice.wav");
+    
+    audio_form f;
+    f.create_window("High Score!");
+    int name_input = f.create_input_box("Enter your name:", "", "", 20);
+    int ok_button = f.create_button("OK", true);
+    int cancel_button = f.create_button("Cancel", false, true);
+    
+    f.focus(name_input);
+    
+    while (true) {
+        wait(5);
+        f.monitor();
+        
+        if (f.is_pressed(ok_button)) {
+            string name = f.get_text(name_input);
+            if (name.length() > 0) {
+                speak("Name confirmed: " + name);
+                return name;
+            } else {
+                speak("Please enter at least one character.");
+                f.focus(name_input);
+            }
+        }
+        
+        if (f.is_pressed(cancel_button)) {
+            speak("Name entry cancelled. Using Anonymous.");
+            return "Anonymous";
+        }
+    }
+    
+    // Fallback (should never reach here)
+    return "Anonymous";
+}
+
+void handle_game_over()
+{
+    double accuracy = 0.0;
+    if (total_swaps > 0) {
+        accuracy = (double(correct_swaps) / double(total_swaps)) * 100.0;
+    }
+    
+    string stats = "Game Statistics: Round reached " + gameround + ", Total swaps " + total_swaps + ", Correct swaps " + correct_swaps + ", Accuracy " + format_float(accuracy, "", 0, 1) + " percent.";
+    
+    sctext(stats, 40, "dlgopn.wav", "gamevoice.wav");
+    
+    // Check if this is a high score
+    if (cb.is_high_score(gameround, accuracy) && total_swaps > 0) {
+        string player_name = audio_name_entry();
+        
+        if (player_name != "") {
+            cb.add_localscore(player_name, gameround, total_swaps, correct_swaps);
+            sctext("Your score has been saved to the leaderboard!", 30, "dlgopn.wav", "gamevoice.wav");
+        }
+    } else {
+        sctext("Thanks for playing! Try again to beat the high scores.", 30, "dlgopn.wav", "gamevoice.wav");
+    }
+}
+
 void main()
 {
 set_sound_storage("*");
@@ -41,7 +224,13 @@ readpreffs();
 void gamesetup()
 {
     nums.resize(0);
-    marknums.resize(0);    
+    marknums.resize(0);
+    
+    // Reset accuracy tracking for new game
+    if (gameround == 1) {
+        total_swaps = 0;
+        correct_swaps = 0;
+    }    
     if (gameround >= 1 && gameround < 5) {
         amount = random(5, 10);
     } else if (gameround >= 5 && gameround <= 10) {
@@ -52,9 +241,9 @@ void gamesetup()
         amount = random(30, 50);
     }
     for (int i = 0; i < amount; i++) {
-        int new_num;
+        double new_num;
         do {
-            new_num = random(1, 99);
+            new_num = generate_number_for_round(gameround);
         } while (nums.find(new_num) != -1);
         nums.insert_last(new_num);
     }
@@ -64,7 +253,22 @@ void gamesetup()
         marknums.insert_last(false);
     }
     
-    speak("Round " + gameround + ". Numbers to arrange: " + amount + ".");
+    string announcement = "Round " + gameround + ". Numbers to arrange: " + amount + ".";
+    
+    // Add difficulty announcements
+    if (gameround == 8) {
+        announcement += " New challenge: Decimal numbers introduced!";
+    } else if (gameround == 12) {
+        announcement += " New challenge: Negative numbers added!";
+    } else if (gameround == 15) {
+        announcement += " New challenge: Larger number ranges!";
+    } else if (gameround == 20) {
+        announcement += " New challenge: Mixed number types!";
+    } else if (gameround == 25) {
+        announcement += " Ultimate challenge: Precision decimals!";
+    }
+    
+    speak(announcement);
    
     if (gameround <= 6) {
         round_time_left = 120;
@@ -89,28 +293,28 @@ void game()
                 if (key_repeating(KEY_HOME)) {
             if (nums.length() > 0) {
                 numker = 0;
-                p.play_stationary("curmove.wav", false);
+                play_curmove_sound();
                 if (marknums[numker]) {
-                    speak(nums[numker] + " (Marked)");
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
                 } else {
-                    speak(nums[numker]);
+                    speak(format_number_for_speech(nums[numker]));
                 }
             } else {
-                p.play_stationary("edge.wav", false);
+                play_edge_sound();
             }
         }
 
         if (key_repeating(KEY_END)) {
             if (nums.length() > 0) {
                 numker = int(nums.length()) - 1;
-                p.play_stationary("curmove.wav", false);
+                play_curmove_sound();
                 if (marknums[numker]) {
-                    speak(nums[numker] + " (Marked)");
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
                 } else {
-                    speak(nums[numker]);
+                    speak(format_number_for_speech(nums[numker]));
                 }
             } else {
-                p.play_stationary("edge.wav", false);
+                play_edge_sound();
             }
         }
         if (key_pressed(KEY_P)) {
@@ -119,6 +323,7 @@ void game()
                 gamemus.pause();
                 speak("Game paused.");
             } else {
+                gamemus.volume = gamemus_volume;
                 gamemus.play_looped();
                 speak("Game resumed.");
             }
@@ -141,40 +346,45 @@ void game()
                 speak("Time's up. Game over.");
                 p.play_stationary("gameover.wav", false);
                 wait(1000);
+                handle_game_over();
                 mainmenu();
             }
         }        
         if(key_down(KEY_PAGEUP)) {
-            gamemus.volume+=0.5;
+            gamemus_volume += 1;
+            if(gamemus_volume > 0) gamemus_volume = 0;
+            gamemus.volume = gamemus_volume;
         } else if(key_down(KEY_PAGEDOWN)) {
-            gamemus.volume-=0.5;
+            gamemus_volume -= 1;
+            if(gamemus_volume < -50) gamemus_volume = -50;
+            gamemus.volume = gamemus_volume;
         }
         
         if (key_repeating(KEY_RIGHT)) {
             if (numker < int(nums.length()) - 1) {
                 numker++;
-                p.play_stationary("curmove.wav", false);
+                play_curmove_sound();
                 if (marknums[numker]) {
-                    speak(nums[numker] + " (Marked)");
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
                 } else {
-                    speak(nums[numker]);
+                    speak(format_number_for_speech(nums[numker]));
                 }
             } else {
-                p.play_stationary("edge.wav", false);
+                play_edge_sound();
             }
         }
         
         if (key_repeating(KEY_LEFT)) {
             if (numker > 0) {
                 numker--;
-                p.play_stationary("curmove.wav", false);
+                play_curmove_sound();
                 if (marknums[numker]) {
-                    speak(nums[numker] + " (Marked)");
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
                 } else {
-                    speak(nums[numker]);
+                    speak(format_number_for_speech(nums[numker]));
                 }
             } else {
-                p.play_stationary("edge.wav", false);
+                play_edge_sound();
             }
         }
         
@@ -192,9 +402,18 @@ void game()
                 }
             }
             if (count == 2) {
-                int temp = nums[first];
+                // Check if this swap brings numbers closer to correct order
+                bool is_good_swap = is_beneficial_swap(first, second);
+                
+                double temp = nums[first];
                 nums[first] = nums[second];
                 nums[second] = temp;
+                
+                total_swaps++;
+                if (is_good_swap) {
+                    correct_swaps++;
+                }
+                
                 p.play_stationary("swap.wav", false);
                 speak("Swapped");
                 for (int i = 0; i < int(marknums.length()); i++)
@@ -235,7 +454,7 @@ void game()
             } else {
                 int correct = 0;
                 int wrong = 0;
-                int[] sorted_nums;
+                double[] sorted_nums;
                 for (uint i = 0; i < nums.length(); i++) {
                     sorted_nums.insert_last(nums[i]);
                 }

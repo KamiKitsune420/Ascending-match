@@ -55,7 +55,7 @@ void stop_speech() {
 	tts.stop();
 }
 
-string tts_dump_config(tts_voice@ v, bool save_screen_reader_setting = ffalse) {
+string tts_dump_config(tts_voice@ v, bool save_screen_reader_setting = false) {
 	string o;
 	if (v.voice < 0) return "default";
 	else o = v.get_voice_name(v.voice) + "||";
@@ -116,6 +116,8 @@ void tts_config(tts_voice@ v, bool main_config = false) {
 				v.set_voice(f.get_list_position(f_voices));
 				v.set_rate(f.get_slider(f_rate));
 				v.set_volume(f.get_slider(f_volume));
+			} else {
+				use_sr = f.is_checked(f_use_sr);
 			}
 			break;
 		}

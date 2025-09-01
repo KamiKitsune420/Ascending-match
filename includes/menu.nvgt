@@ -2,6 +2,8 @@ void mainmenu()
 {
 setupmenu();
 m.add_item("Play", "pl");
+m.add_item("Scoreboard", "sb");
+m.add_item("Options", "op");
 m.add_item("Help", "hp");
 m.add_item("Exit", "ex");
 m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to select an option.";
@@ -18,11 +20,22 @@ if (main == "pl")
 speak("loading");
 m.fade_music();
 gamemus.load("game1.wav");
-gamemus.volume=-15;
+gamemus.volume=gamemus_volume;
 gamemus.pitch=85;
 gamemus.play_looped();
 gamesetup();
 game();
+}
+if (main == "sb")
+{
+cb.get_localscores();
+mainmenu();
+}
+if (main == "op")
+{
+speak("Options");
+optionsmenu();
+mainmenu();
 }
 if (main == "hp")
 {
@@ -41,4 +54,184 @@ speak("exiting");
 m.fade_music();
 exit();
 }
+}
+
+void optionsmenu()
+{
+setupmenu();
+m.add_item("Speech settings", "sp");
+m.add_item("Audio settings", "au");
+m.add_item("Reset scores", "reset");
+m.add_item("Return to main menu", "ret");
+m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";
+int ores = m.run();
+string option = m.get_selected_item_id();
+if(ores==-1)
+{
+return;
+}
+if (option == "sp")
+{
+speechoptionsmenu();
+optionsmenu();
+}
+if (option == "au")
+{
+audiooptionsmenu();
+optionsmenu();
+}
+if (option == "reset")
+{
+if (yes_no("Are you sure you want to reset all local scores?"))
+{
+cb.clear_scores();
+speak("All local scores have been reset.");
+}
+optionsmenu();
+}
+if (option == "ret")
+{
+return;
+}
+}
+
+void speechoptionsmenu()
+{
+setupmenu();
+string current_tts_mode = use_sr ? "Screen Reader" : "SAPI";
+m.add_item("Current TTS mode: " + current_tts_mode, "toggle");
+if (!use_sr)
+{
+m.add_item("Configure SAPI voice", "config");
+}
+m.add_item("Return to options", "ret");
+m.intro_text = "Speech settings menu. Use your navigation keys to move, and press enter to select an option.";
+int sres = m.run();
+string speechoption = m.get_selected_item_id();
+if(sres==-1)
+{
+return;
+}
+if (speechoption == "toggle")
+{
+use_sr = !use_sr;
+writepreffs();
+speak("TTS mode switched to " + (use_sr ? "Screen Reader" : "SAPI"));
+speechoptionsmenu();
+}
+if (speechoption == "config")
+{
+if (!use_sr)
+{
+tts_config(tts);
+writepreffs();
+}
+speechoptionsmenu();
+}
+if (speechoption == "ret")
+{
+return;
+}
+}
+
+void audiooptionsmenu()
+{
+setupmenu();
+array<string>@ output_devices = get_sound_output_devices();
+uint current_device = get_sound_output_device();
+string current_device_name = (current_device < output_devices.length()) ? output_devices[current_device] : "Unknown Device";
+m.add_item("Current output device: " + current_device_name, "current");
+m.add_item("Select output device", "select");
+m.add_item("Game music volume: " + gamemus_volume, "volume");
+m.add_item("Stereo positioning: " + (stereo_positioning ? "On" : "Off"), "stereo");
+m.add_item("Return to options", "ret");
+m.intro_text = "Audio settings menu. Use your navigation keys to move, and press enter to select an option.";
+int ares = m.run();
+string audiooption = m.get_selected_item_id();
+if(ares==-1)
+{
+return;
+}
+if (audiooption == "current")
+{
+speak("Current output device: " + current_device_name);
+audiooptionsmenu();
+}
+if (audiooption == "select")
+{
+selectoutputdevice();
+audiooptionsmenu();
+}
+if (audiooption == "volume")
+{
+setgamemusicvolume();
+audiooptionsmenu();
+}
+if (audiooption == "stereo")
+{
+stereo_positioning = !stereo_positioning;
+writepreffs();
+speak("Stereo positioning " + (stereo_positioning ? "enabled" : "disabled"));
+audiooptionsmenu();
+}
+if (audiooption == "ret")
+{
+return;
+}
+}
+
+void selectoutputdevice()
+{
+setupmenu();
+array<string>@ output_devices = get_sound_output_devices();
+uint current_device = get_sound_output_device();
+for(uint i = 0; i < output_devices.length(); i++)
+{
+string device_name = output_devices[i];
+if(i == current_device)
+{
+device_name += " (Current)";
+}
+m.add_item(device_name, "" + i);
+}
+m.add_item("Cancel", "cancel");
+m.intro_text = "Select an audio output device. Use your navigation keys to move, and press enter to select.";
+int deres = m.run();
+string deviceoption = m.get_selected_item_id();
+if(deres==-1 or deviceoption == "cancel")
+{
+return;
+}
+uint device_id = parse_int(deviceoption);
+if(device_id < output_devices.length())
+{
+set_sound_output_device(device_id);
+writepreffs();
+speak("Output device changed to: " + output_devices[device_id]);
+wait(1000);
+}
+}
+
+void setgamemusicvolume()
+{
+string volume_input = input_box("Game Music Volume", "Enter game music volume (-50 to 0, current: " + gamemus_volume + "):", "" + gamemus_volume);
+if(volume_input == "")
+{
+return;
+}
+int new_volume = parse_int(volume_input);
+if(new_volume < -50)
+{
+new_volume = -50;
+speak("Volume set to minimum: -50");
+}
+else if(new_volume > 0)
+{
+new_volume = 0;
+speak("Volume set to maximum: 0");
+}
+gamemus_volume = new_volume;
+gamemus.volume = gamemus_volume;
+writepreffs();
+speak("Game music volume set to " + gamemus_volume);
 }

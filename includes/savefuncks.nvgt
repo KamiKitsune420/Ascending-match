@@ -5,9 +5,40 @@ if (st.d.exists("menumusvolume"))
 {
 menumusvolume = st.read_int("menumusvolume");
 }
+if (st.d.exists("use_sr"))
+{
+use_sr = st.read_bool("use_sr");
+}
+if (st.d.exists("tts_config"))
+{
+string tts_config_str = st.read_string("tts_config");
+tts_load_config(tts_config_str, tts);
+}
+if (st.d.exists("output_device"))
+{
+int saved_device = st.read_int("output_device");
+uint device_count = get_sound_output_device_count();
+if(saved_device >= 0 && uint(saved_device) < device_count)
+{
+set_sound_output_device(uint(saved_device));
+}
+}
+if (st.d.exists("gamemus_volume"))
+{
+gamemus_volume = st.read_int("gamemus_volume");
+}
+if (st.d.exists("stereo_positioning"))
+{
+stereo_positioning = st.read_bool("stereo_positioning");
+}
 }
 void writepreffs()
 {
 st.add("menumusvolume", menumusvolume);
+st.add("use_sr", use_sr);
+st.add("tts_config", tts_dump_config(tts, true));
+st.add("output_device", int(get_sound_output_device()));
+st.add("gamemus_volume", gamemus_volume);
+st.add("stereo_positioning", stereo_positioning);
 st.save();
 }
