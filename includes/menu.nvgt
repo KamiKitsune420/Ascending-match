@@ -4,7 +4,7 @@ setupmenu();
 m.add_item("Play", "pl");
 m.add_item("Help", "hp");
 m.add_item("Exit", "ex");
-m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to choose.";
+m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to select an option.";
 int mres = m.run();
 string main = m.get_selected_item_id();
 if(mres==-1)
@@ -28,7 +28,11 @@ if (main == "hp")
 {
 speak("loading");
 m.fade_music();
-sctext("Welcome to Ascending Match. Your goal is to match numbers in ascending order. Use arrow keys to navigate, and enter to select.",30,"dlgopn.wav","gamevoice.wav");
+sctext("Welcome to Ascending Match!", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("Your goal is to match numbers in ascending order.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("to do this, use you're left and right arrow keys to navigate in the number list, and press the spacebar to select numbers for marking.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("When you select two numbers, they swap positions in the list with each other.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("to learn more, check the readme.", 30, "dlgopn.wav", "gamevoice.wav");
 mainmenu();
 }
 if (main == "ex")
