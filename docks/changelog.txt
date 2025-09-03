@@ -1,26 +1,20 @@
 New in 0.4.
-Added comprehensive local scoreboard system with encrypted storage.
+Added a comprehensive local scoreboard system.
 Added accuracy tracking system that analyzes swap effectiveness and calculates performance percentages.
-Added audio-based name entry system using audio form interface for high score input.
-Added reset scores option in the options menu with confirmation dialog.
+Added a reset scores option in the options menu with a confirmation dialog.
 Added automatic high score detection and leaderboard integration with top 10 rankings.
 Added detailed score display showing player name, round reached, accuracy percentage, and statistics.
-Enhanced game over sequence with audio statistics presentation using sctext system.
 Added real-time swap analysis to determine correct vs incorrect moves for accuracy calculation.
-Integrated scoreboard menu accessible from main menu between Play and Options.
+Integrated a scoreboard menu accessible from within the main menu of the game.
 Added dynamic difficulty announcements when new challenge types are introduced.
-Added intelligent number formatting system for proper speech of decimals and negative numbers.
-Converted number system from integers to doubles to support decimal and negative number challenges.
+Added a new number formatting system for proper speech of decimals and negative numbers.
 Enhanced Page Up/Page Down volume controls with proper bounds checking and settings persistence.
-Improved menu system with consistent navigation and audio feedback.
 New in 0.3.
-Added comprehensive options menu system accessible from the main menu.
-Added speech settings with ability to switch between Screen Reader and SAPI TTS modes.
+Added an options menu accessible from the main menu.
 Added SAPI voice configuration with voice, rate, and volume settings when using SAPI mode.
+Added speech settings with ability to switch between Screen Reader and SAPI TTS modes.
 Added audio output device selection with real-time switching between available devices.
-Added game music volume control with input box interface (range: -50 to 0, default: -15).
-Added stereo positioning feature for navigation sounds that pans cursor movement sounds based on position in the number array.
-Enhanced stereo positioning to include edge sounds for complete spatial audio feedback.
+Added a stereo positioning feature for navigation sounds that pans cursor movement sounds based on position in the number array.
 Enhanced difficulty progression system with multiple challenge types:
 All new settings are automatically saved to the encrypted settings.dat file and restored on startup.
 Removed the scoreboard system, as it needs to be recoded.
