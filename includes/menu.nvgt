@@ -2,9 +2,9 @@ void mainmenu()
 {
 setupmenu();
 m.add_item("Play", "pl");
+m.add_item("Help", "hp");
 m.add_item("Scoreboard", "sb");
 m.add_item("Options", "op");
-m.add_item("Help", "hp");
 m.add_item("Exit", "ex");
 m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to select an option.";
 int mres = m.run();
@@ -28,12 +28,13 @@ game();
 }
 if (main == "sb")
 {
+m.fade_music();
 cb.get_localscores();
 mainmenu();
 }
 if (main == "op")
 {
-speak("Options");
+m.fade_music();
 optionsmenu();
 mainmenu();
 }
@@ -58,9 +59,9 @@ exit();
 
 void optionsmenu()
 {
-setupmenu();
-m.add_item("Speech settings", "sp");
+setupmenu(false);
 m.add_item("Audio settings", "au");
+m.add_item("Speech settings", "sp");
 m.add_item("Reset scores", "reset");
 m.add_item("Return to main menu", "ret");
 m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";

@@ -69,7 +69,7 @@ class scoreboard
             return;
         }
         
-        setupmenu();
+        setupmenu(false);
         
         for (uint i = 0; i < local_scores.length(); i++) {
             string entry_text = (i + 1) + ": " + local_scores[i].player_name + 

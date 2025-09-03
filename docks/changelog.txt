@@ -1,4 +1,5 @@
 New in 0.4.
+Rearranged some menu options around.
 Added a comprehensive local scoreboard system.
 Added accuracy tracking system that analyzes swap effectiveness and calculates performance percentages.
 Added a reset scores option in the options menu with a confirmation dialog.
