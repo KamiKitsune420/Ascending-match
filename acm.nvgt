@@ -15,7 +15,7 @@ bool []marknums;
 int gameround;
 int amount;
 int numker;
-string version="0.4";
+string version="0.4.1";
 timer round_timer;
 int round_time_left = 0;
 savedata st("data/settings.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");

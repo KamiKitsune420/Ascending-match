@@ -38,4 +38,5 @@ The game gets harder as you go:
 4: Thanks and Credits
 - Game Design and Programming: KamiKitsune and tsatria03
 - Sound Design: KamiKitsune
+Music composer: Kami Kitsune
 - Special thanks to the developers of the NVGT scripting language!

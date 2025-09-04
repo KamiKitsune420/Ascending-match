@@ -1,10 +1,9 @@
-New in 0.4.
-<<<<<<< Updated upstream
-Rearranged some menu options around.
-Added a comprehensive local scoreboard system.
-=======
+New in 0.4.1
 Added achievements! currently, There are 21 in the game! can you find them all? :3
 fixed a bug where music would not stop playing after fading.
+New in 0.4.
+Rearranged some menu options around.
+Added a comprehensive local scoreboard system.
 Added comprehensive local scoreboard system with encrypted storage.
 >>>>>>> Stashed changes
 Added accuracy tracking system that analyzes swap effectiveness and calculates performance percentages.
