@@ -1,0 +1,166 @@
+class achievement_entry
+{
+    string title;
+    string description;
+    uint64 timestamp;
+    
+    achievement_entry()
+    {
+        title = "";
+        description = "";
+        timestamp = 0;
+    }
+    
+    achievement_entry(string t, string desc, uint64 time)
+    {
+        title = t;
+        description = desc;
+        timestamp = time;
+    }
+}
+
+class achievement
+{
+    achievement_entry[] unlocked_achievements;
+    savedata@ achievement_data;
+    sound achievement_sound;
+    
+    achievement()
+    {
+        @achievement_data = savedata("data/achievements.dat", "AchievementDataKey2024AscendingMatchUnlocked");
+        load_achievements();
+    }
+    
+    void award(string title, string description)
+    {
+        // Check if this achievement is already unlocked
+        for (uint i = 0; i < unlocked_achievements.length(); i++) {
+            if (unlocked_achievements[i].title == title) {
+                return; // Already unlocked, don't award again
+            }
+        }
+        
+        // Add the new achievement
+        uint64 current_time = get_TIME_STAMP();
+        achievement_entry new_achievement(title, description, current_time);
+        unlocked_achievements.insert_last(new_achievement);
+        
+        // Save immediately
+        save_achievements();
+        
+        // Play achievement notification
+        show_achievement_notification(title, description);
+    }
+    
+    private void show_achievement_notification(string title, string description)
+    {
+        // Play achievement sound and wait for it to finish
+        achievement_sound.load("achget.wav");
+        achievement_sound.play_wait();
+        
+        // Show the achievement notification using sctext
+        sctext("Achievement awarded, " + title + "!", 40, "dlgopn.wav", "gamevoice.wav");
+        sctext(description, 40, "dlgopn.wav", "gamevoice.wav");
+    }
+    
+    void show_unlocked()
+    {
+        if (unlocked_achievements.length() == 0) {
+            alert("Achievements", "No achievements unlocked yet!");
+            return;
+        }
+        
+        setupmenu();
+        
+        for (uint i = 0; i < unlocked_achievements.length(); i++) {
+            m.add_item(unlocked_achievements[i].title, "achievement_" + i);
+        }
+        
+        m.add_item("Return", "return");
+        m.intro_text = "Your unlocked achievements. Use your navigation keys to browse and press enter to hear the description.";
+        
+        while (true) {
+            int result = m.run();
+            string selected = m.get_selected_item_id();
+            
+            if (result == -1 || selected == "return") {
+                break;
+            }
+            
+            // Show detailed achievement info
+            if (selected.substr(0, 12) == "achievement_") {
+                uint index = parse_int(selected.substr(12));
+                if (index < unlocked_achievements.length()) {
+                    show_achievement_details(index);
+                }
+            }
+        }
+    }
+    
+    private void show_achievement_details(uint index)
+    {
+        achievement_entry@ entry = @unlocked_achievements[index];
+        speak(entry.title + ". " + entry.description);
+    }
+    
+    private void save_achievements()
+    {
+        // Save each achievement entry
+        for (uint i = 0; i < unlocked_achievements.length(); i++) {
+            string prefix = "achievement_" + i + "_";
+            achievement_data.add(prefix + "title", unlocked_achievements[i].title);
+            achievement_data.add(prefix + "description", unlocked_achievements[i].description);
+            achievement_data.add(prefix + "timestamp", int64(unlocked_achievements[i].timestamp));
+        }
+        
+        achievement_data.add("achievement_count", int(unlocked_achievements.length()));
+        achievement_data.save();
+    }
+    
+    private void load_achievements()
+    {
+        achievement_data.load();
+        
+        if (!achievement_data.d.exists("achievement_count")) {
+            return; // No achievements saved yet
+        }
+        
+        int count = achievement_data.read_int("achievement_count");
+        unlocked_achievements.resize(0);
+        
+        for (int i = 0; i < count; i++) {
+            string prefix = "achievement_" + i + "_";
+            
+            if (achievement_data.d.exists(prefix + "title")) {
+                achievement_entry entry;
+                entry.title = achievement_data.read_string(prefix + "title");
+                entry.description = achievement_data.read_string(prefix + "description");
+                entry.timestamp = uint64(achievement_data.read_int64(prefix + "timestamp"));
+                
+                unlocked_achievements.insert_last(entry);
+            }
+        }
+    }
+    
+    void clear_achievements()
+    {
+        unlocked_achievements.resize(0);
+        achievement_data.d.delete_all();
+        achievement_data.save();
+    }
+    
+    int get_achievement_count()
+    {
+        return int(unlocked_achievements.length());
+    }
+    
+    bool has_achievement(string title)
+    {
+        for (uint i = 0; i < unlocked_achievements.length(); i++) {
+            if (unlocked_achievements[i].title == title) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

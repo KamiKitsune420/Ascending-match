@@ -17,8 +17,13 @@
 int menumusvolume=0;
 void fade(sound@ handle, double final_volume = -50, double delay = 25)
 {
-if (handle.volume == final_volume or !handle.active)
+if (!handle.active)
 return;
+if (handle.volume == final_volume)
+{
+handle.stop();
+return;
+}
 while(round(handle.volume, 0) != round(final_volume, 0) and handle.playing) {
 if (handle.volume > final_volume)
 handle.volume = handle.volume - 1;
@@ -28,6 +33,8 @@ else
 break;
 wait (delay);
 }
+// Stop the sound after fade completes
+handle.stop();
 }
 
 class menu {
@@ -88,7 +95,6 @@ volkeydown = key2;
 void fade_music(int value1=20)
 {
 fade(music, -50, value1);
-music.stop();
 }
 void stop_music()
 {

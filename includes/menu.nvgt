@@ -4,6 +4,7 @@ setupmenu();
 m.add_item("Play", "pl");
 m.add_item("Help", "hp");
 m.add_item("Scoreboard", "sb");
+m.add_item("Achievements", "ach");
 m.add_item("Options", "op");
 m.add_item("Exit", "ex");
 m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to select an option.";
@@ -30,6 +31,11 @@ if (main == "sb")
 {
 m.fade_music();
 cb.get_localscores();
+mainmenu();
+}
+if (main == "ach")
+{
+ach.show_unlocked();
 mainmenu();
 }
 if (main == "op")

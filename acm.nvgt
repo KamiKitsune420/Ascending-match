@@ -9,6 +9,7 @@
 #include"includes/savefuncks.nvgt"
 #include"includes/dlgsc.nvgt"
 #include"includes/scoreboard.nvgt"
+#include"includes/achievements.nvgt"
 bool marked;
 bool []marknums;
 int gameround;
@@ -31,7 +32,9 @@ sound_pool p;
 bool game_paused = false;
 int total_swaps = 0;
 int correct_swaps = 0;
+int hints_used = 0;
 scoreboard cb;
+achievement ach;
 void play_curmove_sound()
 {
 if (stereo_positioning && nums.length() > 1)
@@ -185,6 +188,33 @@ string audio_name_entry()
     return "Anonymous";
 }
 
+void check_round_achievements()
+{
+    if (gameround == 2) {
+        ach.award("First Steps", "You completed your first round! You're getting the hang of this number sorting business.");
+    } else if (gameround == 5) {
+        ach.award("Getting Warmed Up", "Five rounds completed! The numbers are getting trickier, but you're keeping up.");
+    } else if (gameround == 8) {
+        ach.award("Decimal Master", "You've mastered the basics and conquered your first decimal numbers!");
+    } else if (gameround == 10) {
+        ach.award("Double Digits", "Ten rounds! You're officially in the big leagues now.");
+    } else if (gameround == 12) {
+        ach.award("Negative Nancy", "You've successfully sorted negative numbers! Math class is paying off.");
+    } else if (gameround == 15) {
+        ach.award("Lucky Fifteen", "Fifteen rounds of number sorting mastery! The developer is impressed.");
+    } else if (gameround == 20) {
+        ach.award("The Twenties Club", "Twenty rounds! You're now handling mixed number types like a pro.");
+    } else if (gameround == 25) {
+        ach.award("Precision Expert", "Twenty-five rounds! You've entered the realm of precision decimals. Few have made it this far.");
+    } else if (gameround == 30) {
+        ach.award("Sorting Legend", "Thirty rounds! You are officially a number sorting legend. The developer bows to your skills.");
+    } else if (gameround == 50) {
+        ach.award("The Ultimate Sorter", "FIFTY ROUNDS! You have achieved the impossible. You are the ultimate number sorting champion!");
+    } else if (gameround == 100) {
+        ach.award("sooooo... board...", "huh. you actually made it this far? I err, didn't expect this. maybe put down the game and take a break? you know what? take this for you're trouble!:p");
+    }
+}
+
 void handle_game_over()
 {
     double accuracy = 0.0;
@@ -195,6 +225,36 @@ void handle_game_over()
     string stats = "Game Statistics: Round reached " + gameround + ", Total swaps " + total_swaps + ", Correct swaps " + correct_swaps + ", Accuracy " + format_float(accuracy, "", 0, 1) + " percent.";
     
     sctext(stats, 40, "dlgopn.wav", "gamevoice.wav");
+    
+    // Check for accuracy achievements
+    if (total_swaps > 0) {
+        if (accuracy >= 90.0) {
+            ach.award("Precision Player", "You achieved 90% or higher accuracy! Your sorting skills are incredibly precise.");
+        } else if (accuracy >= 75.0) {
+            ach.award("Accurate Sorter", "You achieved 75% or higher accuracy! Most of your swaps were beneficial.");
+        } else if (accuracy >= 50.0) {
+            ach.award("Getting Better", "You achieved 50% or higher accuracy! You're learning the optimal sorting strategies.");
+        } else if (accuracy == 0.0) {
+            ach.award("Master of Chaos", "Congratulations! You achieved 0% accuracy. Every single swap made things worse. This is actually impressive in its own special way. Maybe try the opposite of what you think next time?");
+        }
+        
+        if (total_swaps >= 100) {
+            ach.award("Swap Master", "You made 100 or more swaps! That's a lot of number rearranging.");
+        }
+        
+        if (total_swaps >= 500) {
+            ach.award("Swap Maniac", "You made 500 or more swaps! You really love moving those numbers around.");
+        }
+    } else if (total_swaps == 0) {
+        ach.award("The Great Contemplator", "You sat through an entire round without making a single swap. Were you meditating? Taking a nap? Or perhaps you're playing some advanced form of number zen that us mere mortals don't understand. Either way, that's dedication to doing absolutely nothing!");
+    }
+    
+    // Check for hint achievements
+    if (hints_used == 0 && total_swaps > 0) {
+        ach.award("The Independent Thinker", "You completed the game without using a single hint! Either you're incredibly skilled, or you're too proud to ask for help. We respect both possibilities.");
+    } else if (hints_used > 5) {
+        ach.award("The Hint Addict", "You used more than 5 hints in a single game! At this point, the game is practically playing itself. Maybe next time try trusting your own brain a little more? It's not as scary as it seems, we promise!");
+    }
     
     // Check if this is a high score
     if (cb.is_high_score(gameround, accuracy) && total_swaps > 0) {
@@ -216,6 +276,12 @@ set_sound_decryption_key("7nVhy4oVp5LEOZBWXhODm2hI56zSUohj4FzQPhpJNQKd8iR6N2D87W
     show_window("AscendingMatch, version "+version);
 readpreffs();
     gameround=1;
+    
+    // Award welcome achievement on first play
+    if (!ach.has_achievement("Welcome to Ascending Match!")) {
+        ach.award("Welcome to Ascending Match!", "Welcome to the world of number sorting! Get ready to challenge your mind and reflexes.");
+    }
+    
     wait(500);
     speak("Press enter to start.");
     dlgplay("TITLEBIT.wav");
@@ -226,11 +292,11 @@ void gamesetup()
     nums.resize(0);
     marknums.resize(0);
     
-    // Reset accuracy tracking for new game
-    if (gameround == 1) {
-        total_swaps = 0;
-        correct_swaps = 0;
-    }    
+    // Reset game round and accuracy tracking for new game
+    gameround = 1;
+    total_swaps = 0;
+    correct_swaps = 0;
+    hints_used = 0;    
     if (gameround >= 1 && gameround < 5) {
         amount = random(5, 10);
     } else if (gameround >= 5 && gameround <= 10) {
@@ -430,6 +496,10 @@ void game()
                     speak("Round complete!");
                     wait(1000);
                     gameround++;
+                    
+                    // Check for achievements
+                    check_round_achievements();
+                    
                     gamemus.pitch+=1;
                     gamesetup();
                     game();
@@ -471,6 +541,7 @@ void game()
                 speak(correct + " number" + (correct == 1 ? " is" : "s are") + " in the correct spot. " + wrong + " " + (wrong == 1 ? "is" : " are") + " out of place.");
                 p.play_stationary("hint.wav", false);
                 
+                hints_used++;
                 hint_timer.restart(); 
             }
         }
