@@ -6,6 +6,8 @@ class score_entry
     uint64 timestamp;
     int total_swaps;
     int correct_swaps;
+    int time_bonus;
+    string game_mode; // "Normal" or "Time Race"
     
     score_entry()
     {
@@ -15,15 +17,19 @@ class score_entry
         timestamp = 0;
         total_swaps = 0;
         correct_swaps = 0;
+        time_bonus = 0;
+        game_mode = "Normal";
     }
     
-    score_entry(string name, int round, int total, int correct, uint64 time)
+    score_entry(string name, int round, int total, int correct, uint64 time, int bonus = 0, string mode = "Normal")
     {
         player_name = name;
         round_reached = round;
         total_swaps = total;
         correct_swaps = correct;
         timestamp = time;
+        time_bonus = bonus;
+        game_mode = mode;
         
         if (total > 0) {
             accuracy_percent = (double(correct) / double(total)) * 100.0;
@@ -44,10 +50,10 @@ class scoreboard
         load_scores();
     }
     
-    void add_localscore(string player_name, int round_reached, int total_swaps, int correct_swaps)
+    void add_localscore(string player_name, int round_reached, int total_swaps, int correct_swaps, int time_bonus = 0, string game_mode = "Normal")
     {
         uint64 current_time = get_TIME_STAMP();
-        score_entry new_entry(player_name, round_reached, total_swaps, correct_swaps, current_time);
+        score_entry new_entry(player_name, round_reached, total_swaps, correct_swaps, current_time, time_bonus, game_mode);
         
         local_scores.insert_last(new_entry);
         
@@ -69,18 +75,74 @@ class scoreboard
             return;
         }
         
+        // First, show mode selection menu
+        setupmenu(false);
+        m.add_item("Normal Mode Scores", "normal");
+        m.add_item("Time Race Mode Scores", "race");
+        m.add_item("All Scores", "all");
+        m.add_item("Clear all scores", "clear");
+        m.add_item("Return", "return");
+        m.intro_text = "Select which scoreboard to view. Use your navigation keys to move, and press enter to select.";
+        
+        int result = m.run();
+        string selected = m.get_selected_item_id();
+        
+        if (result == -1 || selected == "return") {
+            return;
+        }
+        
+        if (selected == "clear") {
+            if (yes_no("Are you sure you want to clear all local scores?")) {
+                clear_scores();
+                speak("All scores cleared.");
+            }
+            return;
+        }
+        
+        // Show selected scoreboard
+        string mode_filter = "";
+        if (selected == "normal") mode_filter = "Normal";
+        else if (selected == "race") mode_filter = "Time Race";
+        
+        show_scores_for_mode(mode_filter);
+    }
+    
+    private void show_scores_for_mode(string mode_filter)
+    {
+        // Filter scores by mode
+        score_entry[] filtered_scores;
+        for (uint i = 0; i < local_scores.length(); i++) {
+            if (mode_filter == "" || local_scores[i].game_mode == mode_filter) {
+                filtered_scores.insert_last(local_scores[i]);
+            }
+        }
+        
+        if (filtered_scores.length() == 0) {
+            string mode_name = mode_filter == "" ? "any mode" : mode_filter.lower() + " mode";
+            alert("No Scores", "No scores found for " + mode_name + "!");
+            return;
+        }
+        
         setupmenu(false);
         
-        for (uint i = 0; i < local_scores.length(); i++) {
-            string entry_text = (i + 1) + ": " + local_scores[i].player_name + 
-                              ", made it to round " + local_scores[i].round_reached + 
-                              ", with an accuracy of " + format_float(local_scores[i].accuracy_percent, "", 0, 1) + "%";
+        for (uint i = 0; i < filtered_scores.length(); i++) {
+            string entry_text = (i + 1) + ": " + filtered_scores[i].player_name + 
+                              ", " + filtered_scores[i].game_mode + " mode";
+            if (filtered_scores[i].game_mode == "Normal") {
+                entry_text += ", round " + filtered_scores[i].round_reached;
+            } else {
+                entry_text += ", completed in " + (filtered_scores[i].round_reached > 0 ? "victory" : "defeat");
+            }
+            entry_text += ", accuracy " + format_float(filtered_scores[i].accuracy_percent, "", 0, 1) + "%";
+            if (filtered_scores[i].time_bonus > 0) {
+                entry_text += ", bonus " + filtered_scores[i].time_bonus;
+            }
             m.add_item(entry_text, "score_" + i);
         }
         
-        m.add_item("Clear all scores", "clear");
         m.add_item("Return", "return");
-        m.intro_text = "Local high scores. Use your navigation keys to browse the scores.";
+        string title = mode_filter == "" ? "All Local Scores" : mode_filter + " Mode Scores";
+        m.intro_text = title + ". Use your navigation keys to browse the scores.";
         
         while (true) {
             int result = m.run();
@@ -90,23 +152,32 @@ class scoreboard
                 break;
             }
             
-            if (selected == "clear") {
-                if (yes_no("Are you sure you want to clear all local scores?")) {
-                    clear_scores();
-                    speak("All scores cleared.");
-                    break;
-                }
-                continue;
-            }
-            
             // Show detailed score info
             if (selected.substr(0, 6) == "score_") {
                 uint index = parse_int(selected.substr(6));
-                if (index < local_scores.length()) {
-                    show_detailed_score(index);
+                if (index < filtered_scores.length()) {
+                    show_detailed_score_filtered(filtered_scores[index]);
                 }
             }
         }
+    }
+    
+    private void show_detailed_score_filtered(score_entry entry)
+    {
+        string details = "Player: " + entry.player_name + "\n" +
+                        "Game Mode: " + entry.game_mode + "\n";
+        if (entry.game_mode == "Normal") {
+            details += "Round reached: " + entry.round_reached + "\n";
+        } else {
+            details += "Race Result: " + (entry.round_reached > 0 ? "Victory" : "Defeat") + "\n";
+        }
+        details += "Total swaps made: " + entry.total_swaps + "\n" +
+                  "Correct swaps: " + entry.correct_swaps + "\n" +
+                  "Accuracy: " + format_float(entry.accuracy_percent, "", 0, 2) + "%\n" +
+                  "Time bonus points: " + entry.time_bonus + "\n" +
+                  "Date achieved: " + format_timestamp(entry.timestamp);
+        
+        info_box("Score Details", "Detailed information for this score:", details);
     }
     
     private void show_detailed_score(uint index)
@@ -117,6 +188,7 @@ class scoreboard
                         "Total swaps made: " + entry.total_swaps + "\n" +
                         "Correct swaps: " + entry.correct_swaps + "\n" +
                         "Accuracy: " + format_float(entry.accuracy_percent, "", 0, 2) + "%\n" +
+                        "Time bonus points: " + entry.time_bonus + "\n" +
                         "Date achieved: " + format_timestamp(entry.timestamp);
         
         info_box("Score Details", "Detailed information for this score:", details);
@@ -166,6 +238,8 @@ class scoreboard
             score_data.add(prefix + "timestamp", int64(local_scores[i].timestamp));
             score_data.add(prefix + "total_swaps", local_scores[i].total_swaps);
             score_data.add(prefix + "correct_swaps", local_scores[i].correct_swaps);
+            score_data.add(prefix + "time_bonus", local_scores[i].time_bonus);
+            score_data.add(prefix + "game_mode", local_scores[i].game_mode);
         }
         
         score_data.add("score_count", int(local_scores.length()));
@@ -194,6 +268,20 @@ class scoreboard
                 entry.timestamp = uint64(score_data.read_int64(prefix + "timestamp"));
                 entry.total_swaps = score_data.read_int(prefix + "total_swaps");
                 entry.correct_swaps = score_data.read_int(prefix + "correct_swaps");
+                
+                // Load time bonus (with backwards compatibility)
+                if (score_data.d.exists(prefix + "time_bonus")) {
+                    entry.time_bonus = score_data.read_int(prefix + "time_bonus");
+                } else {
+                    entry.time_bonus = 0; // Default for old saves
+                }
+                
+                // Load game mode (with backwards compatibility)
+                if (score_data.d.exists(prefix + "game_mode")) {
+                    entry.game_mode = score_data.read_string(prefix + "game_mode");
+                } else {
+                    entry.game_mode = "Normal"; // Default for old saves
+                }
                 
                 local_scores.insert_last(entry);
             }

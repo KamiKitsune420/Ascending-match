@@ -1,4 +1,24 @@
-New in 0.4.1
+New in 0.6
+Added Time Race mode - compete against AI in fast-paced sorting challenges! Time Race unlocks after reaching round 30 with achievement notification
+AI opponent now provides real-time progress alerts during races
+You now have separate scoreboards for Normal mode and Time Race mode victories/defeats
+Made time Race use simplified numbers (1-50) for quicker gameplay
+Computer opponent balanced for challenging but fair competition
+Enhanced scoreboard menu with mode selection options
+Improved race completion audio with proper music fading
+Made various balance adjustments and bug fixes
+Disabled hints and time limits in Time Race mode for pure competitive sorting focus.
+Implemented proper race victory conditions - first to finish wins immediately with celebration.
+Updated help text and announcements to explain Time Race mode mechanics clearly.
+
+New in 0.5
+Added fractions to rounds 20+ as a new number type for increased mathematical complexity.
+Enhanced achievement system with 7 new achievements including time bonus and competitive achievements.
+Added time bonus system - earn bonus points for completing rounds faster than 50% of allocated time.
+Improved timing system to be more generous for early rounds and scale better with difficulty.
+Fixed negative zero issue - numbers under 0.05 are never made negative to avoid confusing values.
+Enhanced difficulty announcements to mention fractions and updated challenge descriptions.
+Fixed duplicate round announcements by separating game initialization from round setup.
 Added achievements! currently, There are 21 in the game! can you find them all? :3
 fixed a bug where music would not stop playing after fading.
 New in 0.4.

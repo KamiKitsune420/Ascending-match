@@ -1,7 +1,11 @@
 void mainmenu()
 {
 setupmenu();
-m.add_item("Play", "pl");
+m.add_item("Play normal game", "pl");
+// Only show time race if player has reached round 30
+if (stats.highest_round_reached >= 30) {
+    m.add_item("Play time race", "race");
+}
 m.add_item("Help", "hp");
 m.add_item("Scoreboard", "sb");
 m.add_item("Achievements", "ach");
@@ -24,7 +28,20 @@ gamemus.load("game1.wav");
 gamemus.volume=gamemus_volume;
 gamemus.pitch=85;
 gamemus.play_looped();
+init_new_game();
 gamesetup();
+game();
+}
+if (main == "race")
+{
+m.fade_music();
+sctext("Time Race Mode: You have 25 mixed numbers to sort. The computer is also sorting the same numbers.", 40, "dlgopn.wav", "gamevoice.wav");
+sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Press enter to begin!", 40, "dlgopn.wav", "gamevoice.wav");
+gamemus.load("game2.wav");
+gamemus.volume=gamemus_volume;
+gamemus.pitch=85;
+gamemus.play_looped();
+init_time_race();
 game();
 }
 if (main == "sb")
@@ -69,6 +86,7 @@ setupmenu(false);
 m.add_item("Audio settings", "au");
 m.add_item("Speech settings", "sp");
 m.add_item("Reset scores", "reset");
+// m.add_item("Reset statistics", "reset_stats");
 m.add_item("Return to main menu", "ret");
 m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";
 int ores = m.run();
@@ -96,6 +114,15 @@ speak("All local scores have been reset.");
 }
 optionsmenu();
 }
+// if (option == "reset_stats")
+// {
+// if (yes_no("Are you sure you want to reset all game statistics?"))
+// {
+// stats.clear_statistics();
+// speak("All game statistics have been reset.");
+// }
+// optionsmenu();
+// }
 if (option == "ret")
 {
 return;

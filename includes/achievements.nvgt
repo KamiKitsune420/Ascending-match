@@ -23,12 +23,18 @@ class achievement
 {
     achievement_entry[] unlocked_achievements;
     savedata@ achievement_data;
-    sound achievement_sound;
+    sound_pool@ pool;
+    int achievement_sound_slot = -1;
     
     achievement()
     {
         @achievement_data = savedata("data/achievements.dat", "AchievementDataKey2024AscendingMatchUnlocked");
         load_achievements();
+    }
+    
+    void set_sound_pool(sound_pool@ sp)
+    {
+        @pool = sp;
     }
     
     void award(string title, string description)
@@ -54,9 +60,15 @@ class achievement
     
     private void show_achievement_notification(string title, string description)
     {
-        // Play achievement sound and wait for it to finish
-        achievement_sound.load("achget.wav");
-        achievement_sound.play_wait();
+        // Play achievement sound using sound pool
+        if (@pool != null) {
+            achievement_sound_slot = pool.play_stationary("achget.wav", false);
+            
+            // Wait for the sound to finish playing
+            while (achievement_sound_slot != -1 && pool.sound_is_playing(achievement_sound_slot)) {
+                wait(10);
+            }
+        }
         
         // Show the achievement notification using sctext
         sctext("Achievement awarded, " + title + "!", 40, "dlgopn.wav", "gamevoice.wav");

@@ -10,12 +10,14 @@
 #include"includes/dlgsc.nvgt"
 #include"includes/scoreboard.nvgt"
 #include"includes/achievements.nvgt"
+#include"includes/statistics.nvgt"
 bool marked;
 bool []marknums;
 int gameround;
 int amount;
 int numker;
-string version="0.4.1";
+string version="0.6";
+bool reverse_level = false; // Track if current level is descending order
 timer round_timer;
 int round_time_left = 0;
 savedata st("data/settings.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");
@@ -33,8 +35,18 @@ bool game_paused = false;
 int total_swaps = 0;
 int correct_swaps = 0;
 int hints_used = 0;
+int time_bonus_total = 0; // Total time bonus points accumulated
+double last_calculated_time = 0; // Store last calculated time for bonus calculation
+bool time_race_mode = false; // Track if in time race mode
+double[] computer_nums; // Computer's numbers for time race
+int computer_swaps = 0; // Computer's swap count
+int computer_correct_swaps = 0; // Computer's correct swaps
+bool computer_finished = false; // Track if computer finished
+timer race_timer; // Timer for the race
+bool[] computer_progress_announced; // Track which progress milestones have been announced
 scoreboard cb;
 achievement ach;
+game_statistics stats;
 void play_curmove_sound()
 {
 if (stereo_positioning && nums.length() > 1)
@@ -79,7 +91,11 @@ bool is_beneficial_swap(int pos1, int pos2)
     for (uint i = 0; i < nums.length(); i++) {
         sorted_nums.insert_last(nums[i]);
     }
-    sorted_nums.sort_ascending();
+    if (reverse_level) {
+        sorted_nums.sort_descending();
+    } else {
+        sorted_nums.sort_ascending();
+    }
     
     // Check how many positions are correct before the swap
     int correct_before = 0;
@@ -113,41 +129,87 @@ bool is_beneficial_swap(int pos1, int pos2)
 
 double generate_number_for_round(int round)
 {
+    // Calculate shrinking range within each difficulty tier
+    int range_reduction = 0;
+    
     if (round < 8) {
-        // Rounds 1-7: Simple integers 1-99
-        return double(random(1, 99));
+        // Rounds 1-7: Simple integers with shrinking range
+        // Start at 1-99, shrink by 10 each round: 99, 89, 79, 69, 59, 49, 39
+        range_reduction = (round - 1) * 10;
+        int max_range = (99 - range_reduction) < 39 ? 39 : (99 - range_reduction); // Don't go below 39
+        return double(random(1, max_range));
     } else if (round < 12) {
-        // Rounds 8-11: Decimal numbers 1.0-99.9
-        int whole = random(1, 99);
+        // Rounds 8-11: Decimal numbers, reset range then shrink
+        // Reset to full range at 8, then shrink: 99, 89, 79, 69
+        range_reduction = (round - 8) * 10;
+        int max_range = (99 - range_reduction) < 69 ? 69 : (99 - range_reduction);
+        int whole = random(1, max_range);
         int decimal = random(1, 9);
         return double(whole) + (double(decimal) / 10.0);
     } else if (round < 15) {
-        // Rounds 12-14: Mix of positive and negative integers
-        int num = random(1, 99);
-        return random_bool() ? double(num) : double(-num);
+        // Rounds 12-14: Negative/positive integers, reset range then shrink
+        // Reset to full range, then shrink: 99, 89, 79
+        range_reduction = (round - 12) * 10;
+        int max_range = (99 - range_reduction) < 79 ? 79 : (99 - range_reduction);
+        int num = random(1, max_range);
+        // Only apply negative to non-zero numbers
+        return (num == 0 || !random_bool()) ? double(num) : double(-num);
     } else if (round < 20) {
-        // Rounds 15-19: Larger range with negatives (1-999)
-        int num = random(1, 999);
-        return random_bool() ? double(num) : double(-num);
+        // Rounds 15-19: Larger range with negatives, reset then shrink
+        // Start at 1-999, shrink by 100 each round: 999, 899, 799, 699, 599
+        range_reduction = (round - 15) * 100;
+        int max_range = (999 - range_reduction) < 599 ? 599 : (999 - range_reduction);
+        int num = random(1, max_range);
+        // Only apply negative to non-zero numbers
+        return (num == 0 || !random_bool()) ? double(num) : double(-num);
     } else if (round < 25) {
-        // Rounds 20-24: Mix of integers, decimals, and negatives
-        if (random(1, 3) == 1) {
+        // Rounds 20-24: Mix of integers/decimals/negatives, reset then shrink
+        // Reset to 1-999, shrink by 100: 999, 899, 799, 699, 599
+        range_reduction = (round - 20) * 100;
+        int max_range = (999 - range_reduction) < 599 ? 599 : (999 - range_reduction);
+        
+        int type_choice = random(1, 4); // Add fractions as 4th option
+        if (type_choice == 1) {
             // Integer
-            int num = random(1, 999);
-            return random_bool() ? double(num) : double(-num);
-        } else {
+            int num = random(1, max_range);
+            // Only apply negative to non-zero numbers
+            return (num == 0 || !random_bool()) ? double(num) : double(-num);
+        } else if (type_choice == 2) {
             // Decimal
-            int whole = random(1, 999);
+            int whole = random(1, max_range);
             int decimal = random(1, 9);
             double result = double(whole) + (double(decimal) / 10.0);
-            return random_bool() ? result : -result;
+            // Only apply negative to non-zero numbers
+            return (result < 0.05 || !random_bool()) ? result : -result;
+        } else {
+            // Fraction (represented as decimal for sorting purposes)
+            int numerator = random(1, 20);
+            int denominator = random(2, 12);
+            double result = double(numerator) / double(denominator);
+            // Only apply negative to very small numbers (avoid negative zero and tiny fractions)
+            return (result < 0.05 || !random_bool()) ? result : -result;
         }
     } else {
-        // Round 25+: Close decimal precision challenge
-        int base = random(1, 50);
-        int decimal = random(1, 99);
-        double result = double(base) + (double(decimal) / 100.0);
-        return random_bool() ? result : -result;
+        // Round 25+: Mix of precision decimals and fractions, reset then shrink
+        // Start at 1-50, shrink by 5: 50, 45, 40, 35, 30 (minimum 30)
+        range_reduction = (round - 25) * 5;
+        int max_base = (50 - range_reduction) < 30 ? 30 : (50 - range_reduction);
+        
+        if (random(1, 3) <= 2) {
+            // Precision decimals (66% chance)
+            int base = random(1, max_base);
+            int decimal = random(1, 99);
+            double result = double(base) + (double(decimal) / 100.0);
+            // Only apply negative to non-zero numbers
+            return (result < 0.05 || !random_bool()) ? result : -result;
+        } else {
+            // Complex fractions (33% chance)
+            int numerator = random(1, max_base);
+            int denominator = random(2, 20);
+            double result = double(numerator) / double(denominator);
+            // Only apply negative to very small numbers (avoid negative zero and tiny fractions)
+            return (result < 0.05 || !random_bool()) ? result : -result;
+        }
     }
 }
 
@@ -208,10 +270,31 @@ void check_round_achievements()
         ach.award("Precision Expert", "Twenty-five rounds! You've entered the realm of precision decimals. Few have made it this far.");
     } else if (gameround == 30) {
         ach.award("Sorting Legend", "Thirty rounds! You are officially a number sorting legend. The developer bows to your skills.");
+        // Check if this is the first time reaching round 30 to unlock time race
+        if (stats.highest_round_reached < 30) {
+            ach.award("Ready to Race", "You've unlocked Time Race mode! Now you can compete against the computer in high-speed number sorting challenges.");
+            sctext("New feature unlocked: Time Race mode! You can now compete against the computer in fast-paced sorting challenges.", 40, "dlgopn.wav", "gamevoice.wav");
+        }
     } else if (gameround == 50) {
         ach.award("The Ultimate Sorter", "FIFTY ROUNDS! You have achieved the impossible. You are the ultimate number sorting champion!");
     } else if (gameround == 100) {
         ach.award("sooooo... board...", "huh. you actually made it this far? I err, didn't expect this. maybe put down the game and take a break? you know what? take this for you're trouble!:p");
+    }
+    
+    // Time bonus achievements
+    if (time_bonus_total >= 100) {
+        ach.award("Speedy Sorter", "You've earned your first 100 time bonus points! Your quick thinking is paying off.");
+    }
+    if (time_bonus_total >= 500) {
+        ach.award("Lightning Fast", "500 time bonus points! You're consistently completing rounds at impressive speed.");
+    }
+    if (time_bonus_total >= 1000) {
+        ach.award("Time Master", "1000 time bonus points! You've mastered the art of rapid number sorting.");
+    }
+    
+    // Fraction milestone achievements
+    if (gameround == 20) {
+        ach.award("Fraction Pioneer", "You've reached round 20 and encountered your first fractions! Math class is really paying off now.");
     }
 }
 
@@ -222,7 +305,11 @@ void handle_game_over()
         accuracy = (double(correct_swaps) / double(total_swaps)) * 100.0;
     }
     
-    string stats = "Game Statistics: Round reached " + gameround + ", Total swaps " + total_swaps + ", Correct swaps " + correct_swaps + ", Accuracy " + format_float(accuracy, "", 0, 1) + " percent.";
+    string stats = "Game Statistics: Round reached " + gameround + ", Total swaps " + total_swaps + ", Correct swaps " + correct_swaps + ", Accuracy " + format_float(accuracy, "", 0, 1) + " percent";
+    if (time_bonus_total > 0) {
+        stats += ", Time bonus points " + time_bonus_total;
+    }
+    stats += ".";
     
     sctext(stats, 40, "dlgopn.wav", "gamevoice.wav");
     
@@ -256,12 +343,16 @@ void handle_game_over()
         ach.award("The Hint Addict", "You used more than 5 hints in a single game! At this point, the game is practically playing itself. Maybe next time try trusting your own brain a little more? It's not as scary as it seems, we promise!");
     }
     
+    // Record game completion statistics
+    // stats.record_game_completion(gameround - 1, accuracy, time_bonus_total, gameround);
+    
     // Check if this is a high score
     if (cb.is_high_score(gameround, accuracy) && total_swaps > 0) {
         string player_name = audio_name_entry();
         
         if (player_name != "") {
-            cb.add_localscore(player_name, gameround, total_swaps, correct_swaps);
+            string game_mode = time_race_mode ? "Time Race" : "Normal";
+            cb.add_localscore(player_name, gameround, total_swaps, correct_swaps, time_bonus_total, game_mode);
             sctext("Your score has been saved to the leaderboard!", 30, "dlgopn.wav", "gamevoice.wav");
         }
     } else {
@@ -287,16 +378,200 @@ readpreffs();
     dlgplay("TITLEBIT.wav");
     mainmenu();
 }
-void gamesetup()
+
+void init_new_game()
 {
-    nums.resize(0);
-    marknums.resize(0);
-    
-    // Reset game round and accuracy tracking for new game
+    // Initialize a completely new game
     gameround = 1;
     total_swaps = 0;
     correct_swaps = 0;
-    hints_used = 0;    
+    hints_used = 0;
+    time_bonus_total = 0;
+    
+    // Set sound pool reference for achievements
+    ach.set_sound_pool(p);
+}
+
+void init_time_race()
+{
+    // Initialize time race mode
+    time_race_mode = true;
+    gameround = 1;
+    total_swaps = 0;
+    correct_swaps = 0;
+    hints_used = 0;
+    computer_swaps = 0;
+    computer_correct_swaps = 0;
+    computer_finished = false;
+    
+    // Initialize progress tracking (20%, 40%, 60%, 80%)
+    computer_progress_announced.resize(0);
+    for (int i = 0; i < 4; i++) {
+        computer_progress_announced.insert_last(false);
+    }
+    
+    // Generate 25 random numbers for both player and computer
+    nums.resize(0);
+    computer_nums.resize(0);
+    marknums.resize(0);
+    
+    amount = 25;
+    for (int i = 0; i < 25; i++) {
+        // Generate simple integers only for time race
+        double new_num;
+        do {
+            // Only positive integers from 1 to 50 for easier sorting
+            new_num = double(random(1, 50));
+        } while (nums.find(new_num) != -1);
+        
+        nums.insert_last(new_num);
+        computer_nums.insert_last(new_num); // Same numbers for fairness
+        marknums.insert_last(false);
+    }
+    
+    numker = 0;
+    race_timer.restart();
+    
+    // Set sound pool reference for achievements
+    ach.set_sound_pool(p);
+}
+
+timer ai_timer; // Move this to global scope
+int ai_delay = 0; // Move this to global scope
+
+void computer_ai_step()
+{
+    // Smarter AI that looks for good swaps
+    if (ai_delay == 0) {
+        ai_delay = random(1000, 2000); // Initialize delay first time
+    }
+    
+    if (ai_timer.elapsed >= ai_delay) {
+        // Find a good swap by looking for out-of-place numbers
+        double[] sorted_nums;
+        for (uint i = 0; i < computer_nums.length(); i++) {
+            sorted_nums.insert_last(computer_nums[i]);
+        }
+        sorted_nums.sort_ascending();
+        
+        int pos1 = -1, pos2 = -1;
+        
+        // Look for numbers that are in wrong positions
+        for (uint i = 0; i < computer_nums.length() && pos1 == -1; i++) {
+            if (computer_nums[i] != sorted_nums[i]) {
+                pos1 = i;
+                // Find where this number should go
+                for (uint j = 0; j < computer_nums.length(); j++) {
+                    if (computer_nums[j] == sorted_nums[i] && i != j) {
+                        pos2 = j;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // If we couldn't find a perfect swap, or randomly make a mistake (30% chance)
+        if (pos1 == -1 || pos2 == -1 || random(1, 100) <= 30) {
+            pos1 = random(0, computer_nums.length() - 1);
+            pos2 = random(0, computer_nums.length() - 1);
+        }
+        
+        if (pos1 != pos2) {
+            // Make the swap
+            double temp = computer_nums[pos1];
+            computer_nums[pos1] = computer_nums[pos2];
+            computer_nums[pos2] = temp;
+            
+            computer_swaps++;
+            
+            // Check if this swap actually improved things
+            int correct_after = 0;
+            for (uint i = 0; i < computer_nums.length(); i++) {
+                if (computer_nums[i] == sorted_nums[i]) {
+                    correct_after++;
+                }
+            }
+            
+            // Sometimes the AI makes mistakes (70% accuracy target)
+            if (random(1, 100) <= 70) {
+                computer_correct_swaps++;
+            }
+            
+            // Check if computer has completed the sort
+            double[] check_sorted;
+            for (uint i = 0; i < computer_nums.length(); i++) {
+                check_sorted.insert_last(computer_nums[i]);
+            }
+            check_sorted.sort_ascending();
+            
+            bool computer_done = true;
+            for (uint i = 0; i < computer_nums.length(); i++) {
+                if (computer_nums[i] != check_sorted[i]) {
+                    computer_done = false;
+                    break;
+                }
+            }
+            
+            if (computer_done) {
+                computer_finished = true;
+            } else {
+                // Check computer progress and announce milestones
+                double[] sorted_nums;
+                for (uint i = 0; i < computer_nums.length(); i++) {
+                    sorted_nums.insert_last(computer_nums[i]);
+                }
+                sorted_nums.sort_ascending();
+                
+                int correct_positions = 0;
+                for (uint i = 0; i < computer_nums.length(); i++) {
+                    if (computer_nums[i] == sorted_nums[i]) {
+                        correct_positions++;
+                    }
+                }
+                
+                double progress_percent = (double(correct_positions) / double(computer_nums.length())) * 100.0;
+                
+                // Announce progress milestones
+                if (progress_percent >= 20.0 && !computer_progress_announced[0]) {
+                    p.play_stationary("wrn.wav", false);
+                    speak("Alert! The computer is 20 percent done, watch out!");
+                    computer_progress_announced[0] = true;
+                } else if (progress_percent >= 40.0 && !computer_progress_announced[1]) {
+                    p.play_stationary("wrn.wav", false);
+                    speak("Alert! The computer is 40 percent done, watch out!");
+                    computer_progress_announced[1] = true;
+                } else if (progress_percent >= 60.0 && !computer_progress_announced[2]) {
+                    p.play_stationary("wrn.wav", false);
+                    speak("Alert! The computer is 60 percent done, watch out!");
+                    computer_progress_announced[2] = true;
+                } else if (progress_percent >= 80.0 && !computer_progress_announced[3]) {
+                    p.play_stationary("wrn.wav", false);
+                    speak("Alert! The computer is 80 percent done, watch out!");
+                    computer_progress_announced[3] = true;
+                }
+            }
+        }
+        
+        ai_timer.restart();
+        ai_delay = random(4000, 7000); // Next swap in 4-7 seconds (slower pace)
+    }
+}
+
+void gamesetup()
+{
+    // Skip normal setup if in time race mode
+    if (time_race_mode) {
+        // For time race mode, we don't need a time limit
+        round_time_left = 999999; // Set very high so timer doesn't interfere
+        return; // Time race uses its own setup
+    }
+    
+    nums.resize(0);
+    marknums.resize(0);
+    
+    // Only reset game stats for completely new games
+    // gameround should NOT be reset here when called after completing a round
+    
     if (gameround >= 1 && gameround < 5) {
         amount = random(5, 10);
     } else if (gameround >= 5 && gameround <= 10) {
@@ -306,6 +581,14 @@ void gamesetup()
     } else {
         amount = random(30, 50);
     }
+    
+    // Determine if this should be a reverse level (descending order)
+    // 15% chance for reverse levels, but not in first 3 rounds
+    reverse_level = false;
+    if (gameround > 3 && random(1, 100) <= 15) {
+        reverse_level = true;
+    }
+    
     for (int i = 0; i < amount; i++) {
         double new_num;
         do {
@@ -321,6 +604,11 @@ void gamesetup()
     
     string announcement = "Round " + gameround + ". Numbers to arrange: " + amount + ".";
     
+    // Add reverse level announcement
+    if (reverse_level) {
+        announcement += " SPECIAL CHALLENGE: Arrange numbers in DESCENDING order!";
+    }
+    
     // Add difficulty announcements
     if (gameround == 8) {
         announcement += " New challenge: Decimal numbers introduced!";
@@ -329,22 +617,67 @@ void gamesetup()
     } else if (gameround == 15) {
         announcement += " New challenge: Larger number ranges!";
     } else if (gameround == 20) {
-        announcement += " New challenge: Mixed number types!";
+        announcement += " New challenge: Mixed number types including fractions!";
     } else if (gameround == 25) {
-        announcement += " Ultimate challenge: Precision decimals!";
+        announcement += " Ultimate challenge: Precision decimals and complex fractions!";
+    }
+    
+    // Add range shrinking hints for certain rounds
+    if ((gameround - 1) % 4 == 0 && gameround > 1) {
+        announcement += " Number range is tightening for increased difficulty.";
     }
     
     speak(announcement);
    
-    if (gameround <= 6) {
-        round_time_left = 120;
-    } else if (gameround <= 12) {
-        round_time_left = 90;
-    } else if (gameround <= 20) {
-        round_time_left = 60;
-    } else {
-        round_time_left = 45;
+    // Dynamic timing based on both round difficulty and number of items
+    double base_time_per_number = 10.0; // Base seconds per number to sort (more generous)
+    double base_time = 40.0; // Base time regardless of count (increased)
+    double min_time = 60.0; // Minimum time for any round (back to reasonable)
+    
+    // Round difficulty multiplier (gradually decreases as rounds progress)
+    double round_multiplier = 1.2; // Start with generous time for beginners
+    if (gameround >= 4) {
+        round_multiplier = 1.1; // Still generous for early learning
     }
+    if (gameround >= 8) {
+        // Decimal numbers introduced - maintain generous time
+        round_multiplier = 1.05;
+    }
+    if (gameround >= 12) {
+        // Negative numbers - standard time
+        round_multiplier = 1.0;
+    }
+    if (gameround >= 15) {
+        // Larger ranges - slight time reduction
+        round_multiplier = 0.95;
+    }
+    if (gameround >= 20) {
+        // Mixed types - moderate challenge
+        round_multiplier = 0.9;
+    }
+    if (gameround >= 25) {
+        // Precision decimals - highest difficulty but still fair
+        round_multiplier = 0.85;
+    }
+    
+    // Apply reverse level penalty (10% less time for added challenge)
+    if (reverse_level) {
+        round_multiplier *= 0.9;
+    }
+    
+    // Apply shrinking range bonus (closer numbers are harder, give slight time bonus)
+    if ((gameround - 1) % 4 >= 2) { // Later rounds in each tier get small bonus
+        round_multiplier *= 1.05;
+    }
+    
+    // Calculate total time: base time + (numbers * time per number * difficulty)
+    double calculated_time = base_time + (amount * base_time_per_number * round_multiplier);
+    
+    // Store for bonus calculation
+    last_calculated_time = calculated_time < min_time ? min_time : calculated_time;
+    
+    // Ensure minimum time and convert to int
+    round_time_left = int(last_calculated_time);
 
     round_timer.restart();
     tick_timer.restart();
@@ -356,6 +689,32 @@ void game()
     while (true)
     {
         wait(5);
+        
+        // Run computer AI if in time race mode
+        if (time_race_mode) {
+            computer_ai_step();
+            
+            // Check if computer won the race
+            if (computer_finished) {
+                int race_time_seconds = race_timer.elapsed / 1000;
+                double player_accuracy = total_swaps > 0 ? (double(correct_swaps) / double(total_swaps)) * 100.0 : 0.0;
+                double computer_accuracy = computer_swaps > 0 ? (double(computer_correct_swaps) / double(computer_swaps)) * 100.0 : 0.0;
+                
+                p.play_stationary("gameover.wav", false);
+                fade(gamemus);
+                speak("Computer finished first! Computer wins the race!");
+                wait(1000);
+                
+                string results = "Race results: Computer finished in " + race_time_seconds + " seconds and wins! ";
+                results += "Computer made " + computer_swaps + " swaps with " + format_float(computer_accuracy, "", 0, 1) + " percent accuracy. ";
+                results += "You made " + total_swaps + " swaps with " + format_float(player_accuracy, "", 0, 1) + " percent accuracy. Better luck next time!";
+                
+                sctext(results, 40, "dlgopn.wav", "gamevoice.wav");
+                time_race_mode = false;
+                mainmenu();
+                return;
+            }
+        }
                 if (key_repeating(KEY_HOME)) {
             if (nums.length() > 0) {
                 numker = 0;
@@ -399,7 +758,8 @@ void game()
             continue;
         }
 
-        if (tick_timer.elapsed >= 1000) {
+        // Timer countdown only for normal mode, not race mode
+        if (!time_race_mode && tick_timer.elapsed >= 1000) {
             round_time_left--;
             tick_timer.restart();
 
@@ -407,7 +767,8 @@ void game()
                 tick.play();
             }
 
-            if (round_time_left <= 0) {
+            // Time limit only applies to normal mode, not time race
+            if (!time_race_mode && round_time_left <= 0) {
                 gamemus.stop();
                 speak("Time's up. Game over.");
                 p.play_stationary("gameover.wav", false);
@@ -486,24 +847,82 @@ void game()
                     marknums[i] = false;
                 bool sorted = true;
                 for (int i = 0; i < int(nums.length()) - 1; i++) {
-                    if (nums[i] > nums[i + 1]) {
-                        sorted = false;
-                        break;
+                    if (reverse_level) {
+                        // Check descending order for reverse levels
+                        if (nums[i] < nums[i + 1]) {
+                            sorted = false;
+                            break;
+                        }
+                    } else {
+                        // Check ascending order for normal levels
+                        if (nums[i] > nums[i + 1]) {
+                            sorted = false;
+                            break;
+                        }
                     }
                 }
                 if (sorted) {
-                    p.play_stationary("nextround.wav", false);
-                    speak("Round complete!");
-                    wait(1000);
-                    gameround++;
-                    
-                    // Check for achievements
-                    check_round_achievements();
-                    
-                    gamemus.pitch+=1;
-                    gamesetup();
-                    game();
-                    return;
+                    if (time_race_mode) {
+                        // Player finished first - they win!
+                        int race_time_seconds = race_timer.elapsed / 1000;
+                        double player_accuracy = total_swaps > 0 ? (double(correct_swaps) / double(total_swaps)) * 100.0 : 0.0;
+                        double computer_accuracy = computer_swaps > 0 ? (double(computer_correct_swaps) / double(computer_swaps)) * 100.0 : 0.0;
+                        
+                        p.play_stationary("nextround.wav", false);
+                        fade(gamemus);
+                        speak("Congratulations! You finished first and won the race!");
+                        wait(1000);
+                        
+                        // Announce results
+                        string results = "Race results: You finished in " + race_time_seconds + " seconds and won! ";
+                        results += "You made " + total_swaps + " swaps with " + format_float(player_accuracy, "", 0, 1) + " percent accuracy. ";
+                        results += "Computer made " + computer_swaps + " swaps with " + format_float(computer_accuracy, "", 0, 1) + " percent accuracy but didn't finish. ";
+                        results += "Congratulations on your victory!";
+                        
+                        ach.award("Human Supremacy", "You defeated the computer in a time race! Human intelligence prevails!");
+                        
+                        sctext(results, 40, "dlgopn.wav", "gamevoice.wav");
+                        time_race_mode = false; // Exit race mode
+                        mainmenu();
+                        return;
+                    } else {
+                        // Normal mode completion
+                        // Calculate time bonus - must complete in less than 50% of allocated time
+                        int time_remaining = round_time_left;
+                        int fast_completion_threshold = int(last_calculated_time * 0.5); // Must finish in under 50% of time
+                        int time_bonus = 0;
+                        
+                        if (time_remaining > fast_completion_threshold) {
+                            // Only get 2 points per second saved, and only for really fast completion
+                            time_bonus = (time_remaining - fast_completion_threshold) * 2; // Much lower: 2 points per second
+                            time_bonus_total += time_bonus;
+                        }
+                        
+                        p.play_stationary("nextround.wav", false);
+                        string completion_message = "Round complete!";
+                        if (time_bonus > 0) {
+                            completion_message += " Time bonus: " + time_bonus + " points!";
+                            
+                            // Single round time bonus achievements
+                            if (time_bonus >= 50) {
+                                ach.award("Speed Demon", "You earned 50+ time bonus points in a single round! That's some serious speed sorting.");
+                            }
+                            if (time_bonus >= 100) {
+                                ach.award("Rocket Sorter", "100+ time bonus points in one round! You're sorting numbers faster than the speed of sound.");
+                            }
+                        }
+                        speak(completion_message);
+                        wait(1000);
+                        gameround++;
+                        
+                        // Check for achievements
+                        check_round_achievements();
+                        
+                        gamemus.pitch+=1;
+                        gamesetup();
+                        game();
+                        return;
+                    }
                 }
             } else {
                 if (marknums[numker]) {
@@ -517,7 +936,9 @@ void game()
             wait(150);
         }        
         if (key_pressed(KEY_H)) {
-            if (hint_timer.elapsed < HINT_COOLDOWN) {
+            if (time_race_mode) {
+                // Do nothing in time race mode
+            } else if (hint_timer.elapsed < HINT_COOLDOWN) {
                 int secondsLeft = (HINT_COOLDOWN - hint_timer.elapsed) / 1000;
                 speak("You can't use a hint yet. Please wait " + secondsLeft + " more second" + (secondsLeft == 1 ? "" : "s") + ".");
                 p.play_stationary("hinterror.wav", false);
@@ -528,7 +949,11 @@ void game()
                 for (uint i = 0; i < nums.length(); i++) {
                     sorted_nums.insert_last(nums[i]);
                 }
-                sorted_nums.sort_ascending();
+                if (reverse_level) {
+                    sorted_nums.sort_descending();
+                } else {
+                    sorted_nums.sort_ascending();
+                }
 
                 for (uint i = 0; i < nums.length(); i++) {
                     if (nums[i] == sorted_nums[i]) {
@@ -547,12 +972,16 @@ void game()
         }
         
         if (key_pressed(KEY_T)) {
-            if (round_time_left >= 60) {
-                int minutes = round_time_left / 60;
-                int seconds = round_time_left % 60;
-                speak(minutes + " minute" + (minutes == 1 ? "" : "s") + " and " + seconds + " second" + (seconds == 1 ? "" : "s") + " remaining.");
+            if (time_race_mode) {
+                // Do nothing in time race mode
             } else {
-                speak(round_time_left + " second" + (round_time_left == 1 ? "" : "s") + " remaining.");
+                if (round_time_left >= 60) {
+                    int minutes = round_time_left / 60;
+                    int seconds = round_time_left % 60;
+                    speak(minutes + " minute" + (minutes == 1 ? "" : "s") + " and " + seconds + " second" + (seconds == 1 ? "" : "s") + " remaining.");
+                } else {
+                    speak(round_time_left + " second" + (round_time_left == 1 ? "" : "s") + " remaining.");
+                }
             }
         }
 

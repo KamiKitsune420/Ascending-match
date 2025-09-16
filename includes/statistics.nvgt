@@ -1,0 +1,175 @@
+class game_statistics
+{
+    int total_games_played;
+    int total_rounds_completed;
+    double total_accuracy;
+    int total_time_bonuses_earned;
+    int total_time_bonus_points;
+    int highest_round_reached;
+    int fastest_round_time; // In seconds
+    int perfect_rounds; // Rounds with 100% accuracy
+    int time_race_wins;
+    int time_race_losses;
+    savedata@ stats_data;
+    
+    game_statistics()
+    {
+        @stats_data = savedata("data/statistics.dat", "StatsDataKey2024AscendingMatchGameStats");
+        total_games_played = 0;
+        total_rounds_completed = 0;
+        total_accuracy = 0.0;
+        total_time_bonuses_earned = 0;
+        total_time_bonus_points = 0;
+        highest_round_reached = 0;
+        fastest_round_time = 999999; // Start with very high number
+        perfect_rounds = 0;
+        time_race_wins = 0;
+        time_race_losses = 0;
+        load_statistics();
+    }
+    
+    void record_game_completion(int rounds_completed, double accuracy, int time_bonus_points, int round_reached)
+    {
+        total_games_played++;
+        total_rounds_completed += rounds_completed;
+        total_accuracy = ((total_accuracy * (total_games_played - 1)) + accuracy) / total_games_played;
+        
+        if (time_bonus_points > 0) {
+            total_time_bonuses_earned++;
+            total_time_bonus_points += time_bonus_points;
+        }
+        
+        if (round_reached > highest_round_reached) {
+            highest_round_reached = round_reached;
+        }
+        
+        if (accuracy >= 99.9) { // Close to 100% (account for floating point precision)
+            perfect_rounds++;
+        }
+        
+        save_statistics();
+    }
+    
+    void record_round_completion(int round_time_seconds, double accuracy)
+    {
+        if (round_time_seconds < fastest_round_time) {
+            fastest_round_time = round_time_seconds;
+        }
+        save_statistics();
+    }
+    
+    void record_time_race_result(bool won)
+    {
+        if (won) {
+            time_race_wins++;
+        } else {
+            time_race_losses++;
+        }
+        save_statistics();
+    }
+    
+    void show_statistics()
+    {
+        if (total_games_played == 0) {
+            alert("Statistics", "No games played yet! Play some games to see your statistics.");
+            return;
+        }
+        
+        setupmenu();
+        
+        // Calculate averages
+        double avg_rounds_per_game = double(total_rounds_completed) / double(total_games_played);
+        string win_rate = "N/A";
+        if (time_race_wins + time_race_losses > 0) {
+            double rate = (double(time_race_wins) / double(time_race_wins + time_race_losses)) * 100.0;
+            win_rate = format_float(rate, "", 0, 1) + "%";
+        }
+        
+        m.add_item("Games played: " + total_games_played, "games");
+        m.add_item("Total rounds completed: " + total_rounds_completed, "rounds");
+        m.add_item("Average rounds per game: " + format_float(avg_rounds_per_game, "", 0, 1), "avg_rounds");
+        m.add_item("Overall accuracy: " + format_float(total_accuracy, "", 0, 1) + "%", "accuracy");
+        m.add_item("Highest round reached: " + highest_round_reached, "highest");
+        m.add_item("Time bonuses earned: " + total_time_bonuses_earned, "bonuses");
+        m.add_item("Total bonus points: " + total_time_bonus_points, "bonus_points");
+        m.add_item("Perfect rounds (100% accuracy): " + perfect_rounds, "perfect");
+        if (fastest_round_time < 999999) {
+            m.add_item("Fastest round time: " + fastest_round_time + " seconds", "fastest");
+        }
+        m.add_item("Time race win rate: " + win_rate, "race_wins");
+        m.add_item("Return", "return");
+        m.intro_text = "Your game statistics. Use your navigation keys to browse.";
+        
+        while (true) {
+            int result = m.run();
+            string selected = m.get_selected_item_id();
+            
+            if (result == -1 || selected == "return") {
+                break;
+            }
+            
+            // Give more detailed info when items are selected
+            if (selected == "games") {
+                speak("You have played " + total_games_played + " complete games of Ascending Match.");
+            } else if (selected == "accuracy") {
+                speak("Your overall accuracy across all games is " + format_float(total_accuracy, "", 0, 2) + " percent.");
+            } else if (selected == "bonuses") {
+                if (total_time_bonuses_earned > 0) {
+                    double avg_bonus = double(total_time_bonus_points) / double(total_time_bonuses_earned);
+                    speak("You've earned time bonuses in " + total_time_bonuses_earned + " rounds, averaging " + format_float(avg_bonus, "", 0, 1) + " points per bonus.");
+                } else {
+                    speak("You haven't earned any time bonuses yet. Try completing rounds faster!");
+                }
+            }
+        }
+    }
+    
+    private void save_statistics()
+    {
+        stats_data.add("total_games", total_games_played);
+        stats_data.add("total_rounds", total_rounds_completed);
+        stats_data.add("total_accuracy", total_accuracy);
+        stats_data.add("time_bonuses_earned", total_time_bonuses_earned);
+        stats_data.add("time_bonus_points", total_time_bonus_points);
+        stats_data.add("highest_round", highest_round_reached);
+        stats_data.add("fastest_round_time", fastest_round_time);
+        stats_data.add("perfect_rounds", perfect_rounds);
+        stats_data.add("race_wins", time_race_wins);
+        stats_data.add("race_losses", time_race_losses);
+        stats_data.save();
+    }
+    
+    private void load_statistics()
+    {
+        stats_data.load();
+        
+        if (stats_data.d.exists("total_games")) {
+            total_games_played = stats_data.read_int("total_games");
+            total_rounds_completed = stats_data.read_int("total_rounds");
+            total_accuracy = stats_data.read_double("total_accuracy");
+            total_time_bonuses_earned = stats_data.read_int("time_bonuses_earned");
+            total_time_bonus_points = stats_data.read_int("time_bonus_points");
+            highest_round_reached = stats_data.read_int("highest_round");
+            fastest_round_time = stats_data.read_int("fastest_round_time");
+            perfect_rounds = stats_data.read_int("perfect_rounds");
+            time_race_wins = stats_data.read_int("race_wins");
+            time_race_losses = stats_data.read_int("race_losses");
+        }
+    }
+    
+    void clear_statistics()
+    {
+        total_games_played = 0;
+        total_rounds_completed = 0;
+        total_accuracy = 0.0;
+        total_time_bonuses_earned = 0;
+        total_time_bonus_points = 0;
+        highest_round_reached = 0;
+        fastest_round_time = 999999;
+        perfect_rounds = 0;
+        time_race_wins = 0;
+        time_race_losses = 0;
+        stats_data.d.delete_all();
+        stats_data.save();
+    }
+}
