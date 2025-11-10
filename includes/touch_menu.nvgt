@@ -1,0 +1,56 @@
+class touch_menu : touch_interface
+{
+    custom_menu@ menu;
+    touch_gesture_manager@ mgr;
+    touch_menu(touch_gesture_manager@ mgr, custom_menu@ m) {
+        super(mgr);
+        @this.menu = m;
+        @this.mgr = mgr;
+    }
+    void on_swipe_up(touch_screen_finger@ finger) override
+{
+        if (@menu == null) return;
+        if (mgr.finger_map.get_size() == 1) {
+            simulate_key_down(KEY_UP);
+        }
+    }
+    void on_swipe_down(touch_screen_finger@ finger) override
+{
+        if (@menu == null) return;
+        if (mgr.finger_map.get_size() == 1) {
+            simulate_key_down(KEY_DOWN);
+        }
+    }
+    void on_swipe_left(touch_screen_finger@ finger) override
+{
+        if (@menu == null) return;
+        uint fingers = mgr.finger_map.get_size();
+        if (fingers == 1) {
+            simulate_key_down(KEY_LEFT);
+        }
+        else if (fingers == 2) {
+            simulate_key_down(KEY_ESCAPE);
+        }
+    }
+    void on_swipe_right(touch_screen_finger@ finger) override
+{
+        if (@menu == null) return;
+        if (mgr.finger_map.get_size() == 1) {
+            simulate_key_down(KEY_RIGHT);
+        }
+    }
+    void on_double_tap(touch_screen_finger@ finger) override
+{
+        if (@menu == null) return;
+        simulate_key_down(KEY_RETURN);
+    }
+    void on_released_finger(touch_screen_finger@ finger) override
+{
+        if (@finger == null) return;
+        int[] keys = {
+            KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT,
+            KEY_RETURN, KEY_ESCAPE
+        };
+        simulate_keys_up(keys);
+    }
+}
