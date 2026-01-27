@@ -32,11 +32,6 @@ class achievement
         load_achievements();
     }
     
-    void set_sound_pool(sound_pool@ sp)
-    {
-        @pool = sp;
-    }
-    
     void award(string title, string description)
     {
         // Check if this achievement is already unlocked

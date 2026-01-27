@@ -1,0 +1,307 @@
+void game()
+{
+    while (true)
+    {
+        wait(5);
+        
+        // Run computer AI if in time race mode
+        if (time_race_mode) {
+            computer_ai_step();
+            
+            // Check if computer won the race
+            if (computer_finished) {
+                int race_time_seconds = race_timer.elapsed / 1000;
+                double player_accuracy = total_swaps > 0 ? (double(correct_swaps) / double(total_swaps)) * 100.0 : 0.0;
+                double computer_accuracy = computer_swaps > 0 ? (double(computer_correct_swaps) / double(computer_swaps)) * 100.0 : 0.0;
+                
+                p.play_stationary("gameover.wav", false);
+                fade(gamemus);
+                speak("Computer finished first! Computer wins the race!");
+                wait(1000);
+                
+                string results = "Race results: Computer finished in " + race_time_seconds + " seconds and wins! ";
+                results += "Computer made " + computer_swaps + " swaps with " + format_float(computer_accuracy, "", 0, 1) + " percent accuracy. ";
+                results += "You made " + total_swaps + " swaps with " + format_float(player_accuracy, "", 0, 1) + " percent accuracy. Better luck next time!";
+                
+                sctext(results, 40, "dlgopn.wav", "gamevoice.wav");
+                time_race_mode = false;
+                mainmenu();
+                return;
+            }
+        }
+                if (key_repeating(KEY_HOME)) {
+            if (nums.length() > 0) {
+                numker = 0;
+                play_curmove_sound();
+                if (marknums[numker]) {
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
+                } else {
+                    speak(format_number_for_speech(nums[numker]));
+                }
+            } else {
+                play_edge_sound();
+            }
+        }
+
+        if (key_repeating(KEY_END)) {
+            if (nums.length() > 0) {
+                numker = int(nums.length()) - 1;
+                play_curmove_sound();
+                if (marknums[numker]) {
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
+                } else {
+                    speak(format_number_for_speech(nums[numker]));
+                }
+            } else {
+                play_edge_sound();
+            }
+        }
+        if (key_pressed(KEY_P)) {
+            game_paused = !game_paused;
+            if (game_paused) {
+                gamemus.pause();
+                speak("Game paused.");
+            } else {
+                gamemus.volume = gamemus_volume;
+                gamemus.play_looped();
+                speak("Game resumed.");
+            }
+        }
+        
+        if (game_paused) {
+            continue;
+        }
+
+        // Timer countdown only for normal mode, not race mode
+        if (!time_race_mode && tick_timer.elapsed >= 1000) {
+            round_time_left--;
+            tick_timer.restart();
+
+            if (round_time_left < 21) {
+                tick.play();
+            }
+
+            // Time limit only applies to normal mode, not time race
+            if (!time_race_mode && round_time_left <= 0) {
+                gamemus.stop();
+                speak("Time's up. Game over.");
+                p.play_stationary("gameover.wav", false);
+                wait(1000);
+                handle_game_over();
+                mainmenu();
+            }
+        }        
+        if(key_repeating(KEY_PAGEUP)) {
+            gamemus_volume += 5;
+            if(gamemus_volume > 0) gamemus_volume = 0;
+            gamemus.volume = gamemus_volume;
+        } else if(key_repeating(KEY_PAGEDOWN)) {
+            gamemus_volume -= 5;
+            if(gamemus_volume < -50) gamemus_volume = -50;
+            gamemus.volume = gamemus_volume;
+        }
+        
+        if (key_repeating(KEY_RIGHT)) {
+            if (numker < int(nums.length()) - 1) {
+                numker++;
+                play_curmove_sound();
+                if (marknums[numker]) {
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
+                } else {
+                    speak(format_number_for_speech(nums[numker]));
+                }
+            } else {
+                play_edge_sound();
+            }
+        }
+        
+        if (key_repeating(KEY_LEFT)) {
+            if (numker > 0) {
+                numker--;
+                play_curmove_sound();
+                if (marknums[numker]) {
+                    speak(format_number_for_speech(nums[numker]) + " (Marked)");
+                } else {
+                    speak(format_number_for_speech(nums[numker]));
+                }
+            } else {
+                play_edge_sound();
+            }
+        }
+        
+        if (key_repeating(KEY_SPACE)) {
+            marknums[numker] = !marknums[numker];
+            int count = 0;
+            int first = -1, second = -1;
+            for (int i = 0; i < int(marknums.length()); i++) {
+                if (marknums[i]) {
+                    count++;
+                    if (first == -1)
+                        first = i;
+                    else
+                        second = i;
+                }
+            }
+            if (count == 2) {
+                // Check if this swap brings numbers closer to correct order
+                bool is_good_swap = is_beneficial_swap(first, second);
+                
+                double temp = nums[first];
+                nums[first] = nums[second];
+                nums[second] = temp;
+                
+                total_swaps++;
+                if (is_good_swap) {
+                    correct_swaps++;
+                }
+                
+                p.play_stationary("swap.wav", false);
+                speak("Swapped");
+                for (int i = 0; i < int(marknums.length()); i++)
+                    marknums[i] = false;
+                bool sorted = true;
+                for (int i = 0; i < int(nums.length()) - 1; i++) {
+                    if (reverse_level) {
+                        // Check descending order for reverse levels
+                        if (nums[i] < nums[i + 1]) {
+                            sorted = false;
+                            break;
+                        }
+                    } else {
+                        // Check ascending order for normal levels
+                        if (nums[i] > nums[i + 1]) {
+                            sorted = false;
+                            break;
+                        }
+                    }
+                }
+                if (sorted) {
+                    if (time_race_mode) {
+                        // Player finished first - they win!
+                        int race_time_seconds = race_timer.elapsed / 1000;
+                        double player_accuracy = total_swaps > 0 ? (double(correct_swaps) / double(total_swaps)) * 100.0 : 0.0;
+                        double computer_accuracy = computer_swaps > 0 ? (double(computer_correct_swaps) / double(computer_swaps)) * 100.0 : 0.0;
+                        
+                        p.play_stationary("nextround.wav", false);
+                        fade(gamemus);
+                        speak("Congratulations! You finished first and won the race!");
+                        wait(1000);
+                        
+                        // Announce results
+                        string results = "Race results: You finished in " + race_time_seconds + " seconds and won! ";
+                        results += "You made " + total_swaps + " swaps with " + format_float(player_accuracy, "", 0, 1) + " percent accuracy. ";
+                        results += "Computer made " + computer_swaps + " swaps with " + format_float(computer_accuracy, "", 0, 1) + " percent accuracy but didn't finish. ";
+                        results += "Congratulations on your victory!";
+                        
+                        ach.award("Human Supremacy", "You defeated the computer in a time race! Human intelligence prevails!");
+                        
+                        sctext(results, 40, "dlgopn.wav", "gamevoice.wav");
+                        time_race_mode = false; // Exit race mode
+                        mainmenu();
+                        return;
+                    } else {
+                        // Normal mode completion
+                        // Calculate time bonus - must complete in less than 50% of allocated time
+                        int time_remaining = round_time_left;
+                        int fast_completion_threshold = int(last_calculated_time * 0.5); // Must finish in under 50% of time
+                        int time_bonus = 0;
+                        
+                        if (time_remaining > fast_completion_threshold) {
+                            // Only get 2 points per second saved, and only for really fast completion
+                            time_bonus = (time_remaining - fast_completion_threshold) * 2; // Much lower: 2 points per second
+                            time_bonus_total += time_bonus;
+                        }
+                        
+                        p.play_stationary("nextround.wav", false);
+                        string completion_message = "Round complete!";
+                        if (time_bonus > 0) {
+                            completion_message += " Time bonus: " + time_bonus + " points!";
+                            
+                            // Single round time bonus achievements
+                            if (time_bonus >= 50) {
+                                ach.award("Speed Demon", "You earned 50+ time bonus points in a single round! That's some serious speed sorting.");
+                            }
+                            if (time_bonus >= 100) {
+                                ach.award("Rocket Sorter", "100+ time bonus points in one round! You're sorting numbers faster than the speed of sound.");
+                            }
+                        }
+                        speak(completion_message);
+                        wait(1000);
+                        gameround++;
+                        
+                        // Check for achievements
+                        check_round_achievements();
+                        
+                        gamemus.pitch+=1;
+                        gamesetup();
+                        game();
+                        return;
+                    }
+                }
+            } else {
+                if (marknums[numker]) {
+                    p.play_stationary("marked.wav", false);
+                    speak("Marked");
+                } else {
+                    p.play_stationary("unmarked.wav", false);
+                    speak("Unmarked");
+                }
+            }
+            wait(150);
+        }        
+        if (key_pressed(KEY_H)) {
+            if (time_race_mode) {
+                // Do nothing in time race mode
+            } else if (hint_timer.elapsed < HINT_COOLDOWN) {
+                int secondsLeft = (HINT_COOLDOWN - hint_timer.elapsed) / 1000;
+                speak("You can't use a hint yet. Please wait " + secondsLeft + " more second" + (secondsLeft == 1 ? "" : "s") + ".");
+                p.play_stationary("hinterror.wav", false);
+            } else {
+                int correct = 0;
+                int wrong = 0;
+                double[] sorted_nums;
+                for (uint i = 0; i < nums.length(); i++) {
+                    sorted_nums.insert_last(nums[i]);
+                }
+                if (reverse_level) {
+                    sorted_nums.sort_descending();
+                } else {
+                    sorted_nums.sort_ascending();
+                }
+
+                for (uint i = 0; i < nums.length(); i++) {
+                    if (nums[i] == sorted_nums[i]) {
+                        correct++;
+                    } else {
+                        wrong++;
+                    }
+                }
+
+                speak(correct + " number" + (correct == 1 ? " is" : "s are") + " in the correct spot. " + wrong + " " + (wrong == 1 ? "is" : " are") + " out of place.");
+                p.play_stationary("hint.wav", false);
+                
+                hints_used++;
+                hint_timer.restart(); 
+            }
+        }
+        
+        if (key_pressed(KEY_T)) {
+            if (time_race_mode) {
+                // Do nothing in time race mode
+            } else {
+                if (round_time_left >= 60) {
+                    int minutes = round_time_left / 60;
+                    int seconds = round_time_left % 60;
+                    speak(minutes + " minute" + (minutes == 1 ? "" : "s") + " and " + seconds + " second" + (seconds == 1 ? "" : "s") + " remaining.");
+                } else {
+                    speak(round_time_left + " second" + (round_time_left == 1 ? "" : "s") + " remaining.");
+                }
+            }
+        }
+
+        if (key_pressed(KEY_ESCAPE)) {
+            fade(gamemus);
+            mainmenu();
+        }
+    }
+}

@@ -1,3 +1,5 @@
+New in 0.7.
+Major code refinements.
 New in 0.6
 Added Time Race mode - compete against AI in fast-paced sorting challenges! Time Race unlocks after reaching round 30 with achievement notification
 AI opponent now provides real-time progress alerts during races

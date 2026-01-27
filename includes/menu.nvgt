@@ -86,7 +86,6 @@ setupmenu(false);
 m.add_item("Audio settings", "au");
 m.add_item("Speech settings", "sp");
 m.add_item("Reset scores", "reset");
-// m.add_item("Reset statistics", "reset_stats");
 m.add_item("Return to main menu", "ret");
 m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";
 int ores = m.run();
@@ -114,15 +113,6 @@ speak("All local scores have been reset.");
 }
 optionsmenu();
 }
-// if (option == "reset_stats")
-// {
-// if (yes_no("Are you sure you want to reset all game statistics?"))
-// {
-// stats.clear_statistics();
-// speak("All game statistics have been reset.");
-// }
-// optionsmenu();
-// }
 if (option == "ret")
 {
 return;
@@ -131,7 +121,7 @@ return;
 
 void speechoptionsmenu()
 {
-setupmenu();
+setupmenu(false);
 string current_tts_mode = use_sr ? "Screen Reader" : "SAPI";
 m.add_item("Current TTS mode: " + current_tts_mode, "toggle");
 if (!use_sr)
@@ -170,7 +160,7 @@ return;
 
 void audiooptionsmenu()
 {
-setupmenu();
+setupmenu(false);
 array<string>@ output_devices = get_sound_output_devices();
 uint current_device = get_sound_output_device();
 string current_device_name = (current_device < output_devices.length()) ? output_devices[current_device] : "Unknown Device";
@@ -216,7 +206,7 @@ return;
 
 void selectoutputdevice()
 {
-setupmenu();
+setupmenu(false);
 array<string>@ output_devices = get_sound_output_devices();
 uint current_device = get_sound_output_device();
 for(uint i = 0; i < output_devices.length(); i++)

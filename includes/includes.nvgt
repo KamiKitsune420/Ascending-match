@@ -1,0 +1,59 @@
+#pragma asset data
+#pragma document docks
+
+#include"dget.nvgt"
+#include "sound_pool.nvgt"
+
+#include"extrafuncts.nvgt"
+#include "form_menu.nvgt"
+#include"game.nvgt"
+#include "savedata.nvgt" 
+#include"menu.nvgt"
+#include"setupmenu.nvgt"
+#include"speech.nvgt"
+#include"savefuncks.nvgt"
+#include"dlgsc.nvgt"
+#include"scoreboard.nvgt"
+#include"achievements.nvgt"
+#include"statistics.nvgt"
+
+bool marked;
+bool []marknums;
+int gameround;
+int amount;
+int numker;
+timer ai_timer; // Move this to global scope
+int ai_delay = 0; // Move this to global scope
+string version="0.7";
+bool reverse_level = false; // Track if current level is descending order
+timer round_timer;
+int round_time_left = 0;
+savedata st("data/settings.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");
+timer tick_timer;
+sound tick;
+timer hint_timer;
+int HINT_COOLDOWN = 5000; 
+double[] nums;
+sound gamemus;
+int gamemus_volume = -10;
+bool stereo_positioning = false;
+menu m;
+sound_pool p;
+bool game_paused = false;
+int total_swaps = 0;
+int correct_swaps = 0;
+int hints_used = 0;
+int time_bonus_total = 0; // Total time bonus points accumulated
+double last_calculated_time = 0; // Store last calculated time for bonus calculation
+bool time_race_mode = false; // Track if in time race mode
+double[] computer_nums; // Computer's numbers for time race
+int computer_swaps = 0; // Computer's swap count
+int computer_correct_swaps = 0; // Computer's correct swaps
+bool computer_finished = false; // Track if computer finished
+timer race_timer; // Timer for the race
+bool[] computer_progress_announced; // Track which progress milestones have been announced
+scoreboard cb;
+achievement ach;
+game_statistics stats;
+
+typedef uint8 usmall; typedef int8 small;
