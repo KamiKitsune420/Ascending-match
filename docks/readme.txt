@@ -18,8 +18,11 @@ Your goal is simple: select numbers in ascending order before the round timer ru
 
 2.1: The Main Menu
 This menu isn’t complex or anything — it’s very basic. It only has three options:
-- Play: Self-explanatory.
-- How to Play: Gives you a brief explanation of the game and controls.
+- Play Normal game: This allows you to play a normal game.
+- Help: Gives you a brief explanation of the game and controls.
+- Achievements: gives you a list of unlocked achievements. can you unlock them all?
+- Scoreboard: allows you to view high scores for both game modes (will be Discussed below)
+- Options: configure game settings here.
 - Exit: Exits the game.
 
 2.2: Keyboard Controls
@@ -40,3 +43,4 @@ The game gets harder as you go:
 - Sound Design: KamiKitsune
 Music composer: Kami Kitsune
 - Special thanks to the developers of the NVGT scripting language!
+thanks to audio games dot net forum user Athlon for some ideas!

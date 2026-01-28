@@ -1,9 +1,8 @@
 New in 0.7.
-Fixed some bugs with certain sounds not playing propperly.
+Fixed some bugs with certain sounds not playing properly.
 Fixed some issues with selecting TTS voices.
 Made it so all of the game files are now combined into one single file.
 Recoded the entire menu system for the game.
-Addressed some issues with time race mode not unlocking propperly.
 Made some major code refinements.
 New in 0.6
 Added Time Race mode - compete against AI in fast-paced sorting challenges! Time Race unlocks after reaching round 30 with achievement notification
