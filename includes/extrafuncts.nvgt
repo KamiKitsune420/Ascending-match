@@ -223,6 +223,7 @@ void check_round_achievements()
         ach.award("Sorting Legend", "Thirty rounds! You are officially a number sorting legend. The developer bows to your skills.");
         // Check if this is the first time reaching round 15 to unlock time race
         if (stats.highest_round_reached >= 15)
+{
             ach.award("Ready to Race", "You've unlocked Time Race mode! Now you can compete against the computer in high-speed number sorting challenges.");
             sctext("New feature unlocked: Time Race mode! You can now compete against the computer in fast-paced sorting challenges.", 40, "dlgopn.wav", "gamevoice.wav");
 time_race_unlocked=true;
