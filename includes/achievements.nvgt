@@ -56,11 +56,11 @@ class achievement
     private void show_achievement_notification(string title, string description)
     {
         // Play achievement sound using sound pool
-        if (@pool != null) {
-            achievement_sound_slot = pool.play_stationary("achget.wav", false);
+        if (@p != null) {
+            achievement_sound_slot = p.play_stationary("achget.wav", false);
             
             // Wait for the sound to finish playing
-            while (achievement_sound_slot != -1 && pool.sound_is_playing(achievement_sound_slot)) {
+            while (achievement_sound_slot != -1 && p.sound_is_playing(achievement_sound_slot)) {
                 wait(10);
             }
         }

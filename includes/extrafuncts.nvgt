@@ -193,11 +193,11 @@ void play_edge_sound()
 if (stereo_positioning && nums.length() > 1)
 {
 float pan = -100.0 + (200.0 * numker / (nums.length() - 1));
-p.play_stationary_extended("edge.wav", false, 0, pan, 0.0, 100.0);
+p.play_stationary_extended("curedge.wav", false, 0, pan, 0.0, 100.0);
 }
 else
 {
-p.play_stationary("edge.wav", false);
+p.play_stationary("curedge.wav", false);
 }
 }
 

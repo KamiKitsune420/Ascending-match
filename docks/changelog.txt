@@ -1,4 +1,6 @@
 New in 0.7.
+Fixed some bugs with certain sounds not playing propperly.
+Fixed some issues with selecting TTS voices.
 Made it so all of the game files are now combined into one single file.
 Recoded the entire menu system for the game.
 Addressed some issues with time race mode not unlocking propperly.
