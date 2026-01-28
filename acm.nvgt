@@ -4,9 +4,7 @@ void main()
 set_sound_storage("data/sounds.dat");
 set_sound_decryption_key("7nVhy4oVp5LEOZBWXhODm2hI56zSUohj4FzQPhpJNQKd8iR6N2D87WmmNketbe0gArbFEP9TAlhmlRv9bqfI4ip6pRz0na4Zf5y3pBbsMaqDStP1fYY3LPESaJ4s80EtP5scps6ktY0Fh53Dkj3zZZce5N6iQXx9dOqrwYuQcds9awWhDVWkUXzj93KUXSCPnGB3InJeINNDZvdl0yxRBwqzb49NYq8LrWSFne5tWXRNWtvwgPiuiHRw4VcX2G8C8ytbiWyFbp2Ht2Geukp0ZyAicxRLaROgLJIOVLIO1RTHhEA2IviNlR6rDifLVdKQP0Ou3OvkyoT3WpLTIFNwET6hvi04DS42ABb6TBKeu5OOX75cKlvOTnaE1sDCujpeIPMXHMFbS82e9DEbc0J5wFyfPcLLyJdRupnJESCY9LpahC5CF9OuMkl3md4LgoXPvpQhqJNb1eyyQkagTcsMnXpGA4grFAiSXORm",true);
     show_window("AscendingMatch, version "+version);
-readpreffs();
-    gameround=1;
-    
+readpreffs();    
     // Award welcome achievement on first play
     if (!ach.has_achievement("Welcome to Ascending Match!")) {
         ach.award("Welcome to Ascending Match!", "Welcome to the world of number sorting! Get ready to challenge your mind and reflexes.");
@@ -21,7 +19,7 @@ readpreffs();
 void init_new_game()
 {
     // Initialize a completely new game
-    gameround = 1;
+gameround=1;
     total_swaps = 0;
     correct_swaps = 0;
     hints_used = 0;
@@ -75,7 +73,7 @@ void gamesetup()
     // Skip normal setup if in time race mode
     if (time_race_mode) {
         // For time race mode, we don't need a time limit
-        round_time_left = 999999; // Set very high so timer doesn't interfere
+        round_time_left = 1000000; // Set very high so timer doesn't interfere
         return; // Time race uses its own setup
     }
     

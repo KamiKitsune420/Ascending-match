@@ -31,6 +31,10 @@ if (st.d.exists("stereo_positioning"))
 {
 stereo_positioning = st.read_bool("stereo_positioning");
 }
+if (st.d.exists("time_race_unlocked"))
+{
+time_race_unlocked = st.read_bool("time_race_unlocked");
+}
 }
 void writepreffs()
 {
@@ -40,5 +44,6 @@ st.add("tts_config", tts_dump_config(tts, true));
 st.add("output_device", int(get_sound_output_device()));
 st.add("gamemus_volume", gamemus_volume);
 st.add("stereo_positioning", stereo_positioning);
+st.add("time_race_unlocked", time_race_unlocked);
 st.save();
 }

@@ -2,8 +2,9 @@ void mainmenu()
 {
 setupmenu();
 m.add_item("Play normal game", "pl");
-// Only show time race if player has reached round 30
-if (stats.highest_round_reached >= 30) {
+// Only show time race if player has reached round 15
+if (stats.highest_round_reached >= 15 and time_race_unlocked == true)
+{
     m.add_item("Play time race", "race");
 }
 m.add_item("Help", "hp");

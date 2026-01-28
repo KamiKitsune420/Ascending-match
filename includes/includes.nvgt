@@ -46,6 +46,7 @@ int hints_used = 0;
 int time_bonus_total = 0; // Total time bonus points accumulated
 double last_calculated_time = 0; // Store last calculated time for bonus calculation
 bool time_race_mode = false; // Track if in time race mode
+bool time_race_unlocked = true;
 double[] computer_nums; // Computer's numbers for time race
 int computer_swaps = 0; // Computer's swap count
 int computer_correct_swaps = 0; // Computer's correct swaps

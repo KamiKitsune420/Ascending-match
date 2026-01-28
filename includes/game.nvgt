@@ -91,16 +91,20 @@ void game()
                 mainmenu();
             }
         }        
-        if(key_repeating(KEY_PAGEUP)) {
+        if(key_repeating(KEY_PAGEUP))
+{
             gamemus_volume += 5;
             if(gamemus_volume > 0) gamemus_volume = 0;
             gamemus.volume = gamemus_volume;
-        } else if(key_repeating(KEY_PAGEDOWN)) {
+writepreffs();
+        }
+else if(key_repeating(KEY_PAGEDOWN))
+{
             gamemus_volume -= 5;
             if(gamemus_volume < -50) gamemus_volume = -50;
             gamemus.volume = gamemus_volume;
-        }
-        
+        writepreffs();
+}        
         if (key_repeating(KEY_RIGHT)) {
             if (numker < int(nums.length()) - 1) {
                 numker++;
