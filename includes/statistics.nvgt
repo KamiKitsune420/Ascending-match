@@ -71,7 +71,7 @@ class game_statistics
     void show_statistics()
     {
         if (total_games_played == 0) {
-            alert("Statistics", "No games played yet! Play some games to see your statistics.");
+            alert("error", "No games played yet! Play some games to see your statistics.");
             return;
         }
         

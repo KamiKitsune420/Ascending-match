@@ -73,7 +73,7 @@ class achievement
     void show_unlocked()
     {
         if (unlocked_achievements.length() == 0) {
-            alert("Achievements", "No achievements unlocked yet!");
+            alert("error", "No achievements unlocked yet!");
             return;
         }
         

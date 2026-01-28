@@ -71,7 +71,7 @@ class scoreboard
     void get_localscores()
     {
         if (local_scores.length() == 0) {
-            alert("Local Scores", "No local scores recorded yet!");
+            alert("error", "No local scores recorded yet!");
             return;
         }
         
@@ -128,7 +128,7 @@ return;
         
         if (filtered_scores.length() == 0) {
             string mode_name = mode_filter == "" ? "any mode" : mode_filter.lower() + " mode";
-            alert("No Scores", "No scores found for " + mode_name + "!");
+            alert("error", "No scores found for " + mode_name + "!");
             return;
         }
         
