@@ -1,0 +1,28 @@
+string sound_storage;
+string get_sound_storage() {
+	return sound_storage;
+}
+
+pack@open_pack(const string&in filename) {
+	if (filename.is_empty()) return null;
+	pack p;
+	if (p.open(filename, PACK_OPEN_MODE_READ)) return p;
+	else return null;
+}
+
+bool set_sound_storage(const string&in filename, bool reset = false) {
+	if (reset and filename.is_empty()) {
+		@sound_default_pack = null;
+		sound_storage = "";
+	}
+	pack@p = open_pack(filename);
+	if (@p == null) return false;
+	@sound_default_pack = p;
+	sound_storage = filename;
+	return true;
+}
+
+bool set_sound_decryption_key(const string& in key, bool force_encryption) {
+	return (true);
+}
+

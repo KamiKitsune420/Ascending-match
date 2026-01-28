@@ -1,4 +1,5 @@
 New in 0.7.
+Recoded the entire menu system for the game.
 Addressed some issues with time race mode not unlocking propperly.
 Made some major code refinements.
 New in 0.6

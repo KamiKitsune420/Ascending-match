@@ -1,6 +1,6 @@
 void mainmenu()
 {
-setupmenu();
+setupmenu(true);
 m.add_item("Play normal game", "pl");
 // Only show time race if player has reached round 15
 if (stats.highest_round_reached >= 15 and time_race_unlocked == true)
@@ -14,7 +14,7 @@ m.add_item("Options", "op");
 m.add_item("Exit", "ex");
 m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to select an option.";
 int mres = m.run();
-string main = m.get_selected_item_id();
+string main = m.get_item_id(mres);
 if(mres==-1)
 {
 speak("exiting");
@@ -83,14 +83,14 @@ exit();
 
 void optionsmenu()
 {
-setupmenu(false);
+setupmenu();
 m.add_item("Audio settings", "au");
 m.add_item("Speech settings", "sp");
 m.add_item("Reset scores", "reset");
 m.add_item("Return to main menu", "ret");
 m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";
 int ores = m.run();
-string option = m.get_selected_item_id();
+string option = m.get_item_id(ores);
 if(ores==-1)
 {
 return;
@@ -107,12 +107,22 @@ optionsmenu();
 }
 if (option == "reset")
 {
-if (yes_no("Are you sure you want to reset all local scores?"))
+setupmenu();
+    m.add_item("Yes", "yes");
+    m.add_item("No", "no");
+m.intro_text="Are you sure you want to reset all local scores?";
+int mres=m.run();
+string confirm = m.get_item_id(mres);
+    if (mres == -1 or confirm == "no")
+    {
+optionsmenu();
+}
+if(confirm=="yes")
 {
 cb.clear_scores();
 speak("All local scores have been reset.");
-}
 optionsmenu();
+}
 }
 if (option == "ret")
 {
@@ -122,7 +132,7 @@ return;
 
 void speechoptionsmenu()
 {
-setupmenu(false);
+setupmenu();
 string current_tts_mode = use_sr ? "Screen Reader" : "SAPI";
 m.add_item("Current TTS mode: " + current_tts_mode, "toggle");
 if (!use_sr)
@@ -132,7 +142,7 @@ m.add_item("Configure SAPI voice", "config");
 m.add_item("Return to options", "ret");
 m.intro_text = "Speech settings menu. Use your navigation keys to move, and press enter to select an option.";
 int sres = m.run();
-string speechoption = m.get_selected_item_id();
+string speechoption = m.get_item_id(sres);
 if(sres==-1)
 {
 return;
@@ -161,7 +171,7 @@ return;
 
 void audiooptionsmenu()
 {
-setupmenu(false);
+setupmenu();
 array<string>@ output_devices = get_sound_output_devices();
 uint current_device = get_sound_output_device();
 string current_device_name = (current_device < output_devices.length()) ? output_devices[current_device] : "Unknown Device";
@@ -172,7 +182,7 @@ m.add_item("Stereo positioning: " + (stereo_positioning ? "On" : "Off"), "stereo
 m.add_item("Return to options", "ret");
 m.intro_text = "Audio settings menu. Use your navigation keys to move, and press enter to select an option.";
 int ares = m.run();
-string audiooption = m.get_selected_item_id();
+string audiooption = m.get_item_id(ares);
 if(ares==-1)
 {
 return;
@@ -207,7 +217,7 @@ return;
 
 void selectoutputdevice()
 {
-setupmenu(false);
+setupmenu();
 array<string>@ output_devices = get_sound_output_devices();
 uint current_device = get_sound_output_device();
 for(uint i = 0; i < output_devices.length(); i++)
@@ -222,7 +232,7 @@ m.add_item(device_name, "" + i);
 m.add_item("Cancel", "cancel");
 m.intro_text = "Select an audio output device. Use your navigation keys to move, and press enter to select.";
 int deres = m.run();
-string deviceoption = m.get_selected_item_id();
+string deviceoption = m.get_item_id(deres);
 if(deres==-1 or deviceoption == "cancel")
 {
 return;

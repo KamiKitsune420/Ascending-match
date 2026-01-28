@@ -76,29 +76,38 @@ class scoreboard
         }
         
         // First, show mode selection menu
-        setupmenu(false);
+        setupmenu();
         m.add_item("Normal Mode Scores", "normal");
         m.add_item("Time Race Mode Scores", "race");
         m.add_item("All Scores", "all");
         m.add_item("Clear all scores", "clear");
         m.add_item("Return", "return");
-        m.intro_text = "Select which scoreboard to view. Use your navigation keys to move, and press enter to select.";
+        m.intro_text = "Select which scoreboard to view. Use your navigation keys to move, and press enter to select.";       
+        int res = m.run();
+        string selected = m.get_item_id(res);
         
-        int result = m.run();
-        string selected = m.get_selected_item_id();
-        
-        if (result == -1 || selected == "return") {
+        if (res == -1 || selected == "return") {
             return;
-        }
-        
-        if (selected == "clear") {
-            if (yes_no("Are you sure you want to clear all local scores?")) {
+        }        
+        if (selected == "clear")
+{
+setupmenu();
+    m.add_item("Yes", "yes");
+    m.add_item("No", "no");
+m.intro_text="Are you sure you want to clear all local scores?";
+int mres=m.run();
+string confirm = m.get_item_id(mres);
+    if (mres == -1 or confirm == "no")
+    {
+return;
+}
+if(confirm=="yes")
+{
                 clear_scores();
                 speak("All scores cleared.");
-            }
-            return;
-        }
-        
+return;
+}
+}
         // Show selected scoreboard
         string mode_filter = "";
         if (selected == "normal") mode_filter = "Normal";
@@ -123,7 +132,7 @@ class scoreboard
             return;
         }
         
-        setupmenu(false);
+        setupmenu();
         
         for (uint i = 0; i < filtered_scores.length(); i++) {
             string entry_text = (i + 1) + ": " + filtered_scores[i].player_name + 
@@ -145,10 +154,10 @@ class scoreboard
         m.intro_text = title + ". Use your navigation keys to browse the scores.";
         
         while (true) {
-            int result = m.run();
-            string selected = m.get_selected_item_id();
+            int res = m.run();
+            string selected = m.get_item_id(res);
             
-            if (result == -1 || selected == "return") {
+            if (res == -1 || selected == "return") {
                 break;
             }
             

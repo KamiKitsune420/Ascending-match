@@ -87,10 +87,10 @@ class achievement
         m.intro_text = "Your unlocked achievements. Use your navigation keys to browse and press enter to hear the description.";
         
         while (true) {
-            int result = m.run();
-            string selected = m.get_selected_item_id();
+            int res = m.run();
+            string selected = m.get_item_id(res);
             
-            if (result == -1 || selected == "return") {
+            if (res == -1 || selected == "return") {
                 break;
             }
             

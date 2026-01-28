@@ -1,9 +1,21 @@
 /*
 This class was made by Mason, with modifications made by me to include the reading and saving of boolion variables. I also changed the wording a bit on some of the functions.
 */
-
 //savedata class.
 //by Ultrocity Audio
+
+string string_encrypt(const string& in the_string, const string& in encryption_key) {
+	return (string_aes_encrypt(the_string, encryption_key));
+}
+
+string string_decrypt(const string& in the_string, const string& in encryption_key) {
+	return (string_aes_decrypt(the_string, encryption_key));
+}
+
+string serialize(dictionary@ the_data) {
+	return (the_data.serialize());
+}
+
 class savedata
 {
 //internal variables for the class.
