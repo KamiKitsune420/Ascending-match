@@ -227,7 +227,7 @@ void check_round_achievements()
             ach.award("Ready to Race", "You've unlocked Time Race mode! Now you can compete against the computer in high-speed number sorting challenges.");
             sctext("New feature unlocked: Time Race mode! You can now compete against the computer in fast-paced sorting challenges.", 40, "dlgopn.wav", "gamevoice.wav");
 time_race_unlocked=true;
-writepreffs();
+writedata();
         }
     } else if (gameround == 50) {
         ach.award("The Ultimate Sorter", "FIFTY ROUNDS! You have achieved the impossible. You are the ultimate number sorting champion!");

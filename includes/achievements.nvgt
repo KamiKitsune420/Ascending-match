@@ -28,7 +28,7 @@ class achievement
     
     achievement()
     {
-        @achievement_data = savedata("data/achievements.dat", "AchievementDataKey2024AscendingMatchUnlocked");
+        @achievement_data = savedata("data/game.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");
         load_achievements();
     }
     
@@ -107,7 +107,7 @@ class achievement
     private void show_achievement_details(uint index)
     {
         achievement_entry@ entry = @unlocked_achievements[index];
-        speak(entry.title + ". " + entry.description);
+        dlg(entry.title + ". " + entry.description);
     }
     
     private void save_achievements()

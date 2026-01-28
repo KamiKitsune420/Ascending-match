@@ -40,6 +40,34 @@ void sctext(string txt, int ms, string opnsnd, string scsound)
     // Play sound when Enter is pressed
     p.play_stationary("dlg.wav", false);
 }
+void dlg(string message, bool dlgcoppy=true, bool dlgsound=true, int timeout=-1)
+{
+timer timeouter;
+if(dlgsound==true) temp.play_stationary("dlgopn.wav", false);
+speak(message);
+while(true)
+{
+wait(5);
+if (timeout>-1 and timeouter.elapsed>=timeout)
+return;
+if (key_repeating(KEY_C) and dlgcoppy==true)
+{
+temp.destroy_all();
+temp.play_stationary("dlgcoppy.ogg", false);
+speak("Text copied");
+clipboard_set_text(message);
+}
+if (key_repeating(KEY_LEFT) or key_repeating(KEY_RIGHT) or key_repeating(KEY_UP) or key_repeating(KEY_DOWN))
+{
+speak(message);
+}
+if(key_repeating(KEY_RETURN) or key_down(KEY_A))
+{
+temp.destroy_all();
+break;
+}
+}
+}
 void dlgplay(string dlgsound, bool skippable=true, bool fadeable=true, int fadetime=30)
 {
 sound dlgaudio;

@@ -14,7 +14,7 @@ class game_statistics
     
     game_statistics()
     {
-        @stats_data = savedata("data/statistics.dat", "StatsDataKey2024AscendingMatchGameStats");
+        @stats_data = savedata("data/game.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");
         total_games_played = 0;
         total_rounds_completed = 0;
         total_accuracy = 0.0;

@@ -8,11 +8,11 @@ if (stats.highest_round_reached >= 15 and time_race_unlocked == true)
     m.add_item("Play time race", "race");
 }
 m.add_item("Help", "hp");
-m.add_item("Scoreboard", "sb");
 m.add_item("Achievements", "ach");
+m.add_item("Scoreboard", "sb");
 m.add_item("Options", "op");
 m.add_item("Exit", "ex");
-m.intro_text = "Welcome to Ascending Match! Use your navigation keys to move, and press enter to select an option.";
+m.intro_text = "Main menu. Use your navigation keys to move, and press enter to select an option.";
 int mres = m.run();
 string main = m.get_item_id(mres);
 if(mres==-1)
@@ -53,6 +53,7 @@ mainmenu();
 }
 if (main == "ach")
 {
+m.fade_music();
 ach.show_unlocked();
 mainmenu();
 }
@@ -150,7 +151,7 @@ return;
 if (speechoption == "toggle")
 {
 use_sr = !use_sr;
-writepreffs();
+writedata();
 speak("TTS mode switched to " + (use_sr ? "Screen Reader" : "SAPI"));
 speechoptionsmenu();
 }
@@ -159,7 +160,7 @@ if (speechoption == "config")
 if (!use_sr)
 {
 tts_config(tts);
-writepreffs();
+writedata();
 }
 speechoptionsmenu();
 }
@@ -205,7 +206,7 @@ audiooptionsmenu();
 if (audiooption == "stereo")
 {
 stereo_positioning = !stereo_positioning;
-writepreffs();
+writedata();
 speak("Stereo positioning " + (stereo_positioning ? "enabled" : "disabled"));
 audiooptionsmenu();
 }
@@ -241,7 +242,7 @@ uint device_id = parse_int(deviceoption);
 if(device_id < output_devices.length())
 {
 set_sound_output_device(device_id);
-writepreffs();
+writedata();
 speak("Output device changed to: " + output_devices[device_id]);
 wait(1000);
 }
@@ -267,6 +268,6 @@ speak("Volume set to maximum: 0");
 }
 gamemus_volume = new_volume;
 gamemus.volume = gamemus_volume;
-writepreffs();
+writedata();
 speak("Game music volume set to " + gamemus_volume);
 }

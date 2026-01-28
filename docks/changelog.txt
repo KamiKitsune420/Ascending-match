@@ -1,4 +1,5 @@
 New in 0.7.
+Made it so all of the game files are now combined into one single file.
 Recoded the entire menu system for the game.
 Addressed some issues with time race mode not unlocking propperly.
 Made some major code refinements.

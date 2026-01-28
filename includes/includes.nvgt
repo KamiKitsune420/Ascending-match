@@ -6,7 +6,7 @@
 
 #include"achievements.nvgt"
 #include"custom_menu.nvgt"
-#include"dlgsc.nvgt"
+#include"dlg.nvgt"
 #include"extrafuncts.nvgt"
 #include"game.nvgt"
 #include"menu.nvgt"
@@ -50,10 +50,10 @@ timer tick_timer;
 timer hint_timer;
 timer race_timer; // Timer for the race
 custom_menu m;
-savedata st("data/settings.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");
+savedata sd("data/game.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");
 sound tick;
 sound gamemus;
-sound_pool p, spool;
+sound_pool p, spool, temp;
 scoreboard cb;
 achievement ach;
 game_statistics stats;

@@ -270,14 +270,14 @@ if (key_down(volkeydown) and voltimer.elapsed >= voltime and menumusvolume > -10
 {
 menumusvolume -= 5;
 music.set_volume(menumusvolume);
-writepreffs();
+writedata();
 voltimer.restart();
 }
 if (key_down(volkeyup) and voltimer.elapsed >= voltime and menumusvolume < 0)
 {
 menumusvolume += 5;
 music.set_volume(menumusvolume);
-writepreffs();
+writedata();
 voltimer.restart();
 }
             if (key_repeating(KEY_TAB))
