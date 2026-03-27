@@ -19,5 +19,6 @@
 #include"sound_storage.nvgt"
 #include"speech.nvgt"
 #include"statistics.nvgt"
+#include"touch.nvgt"
 
 typedef uint8 usmall; typedef int8 small;
