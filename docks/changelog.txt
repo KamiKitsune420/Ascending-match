@@ -1,4 +1,5 @@
 New in 0.8
+the game has been compiled for ios and it works! yay!
 added some new achievements
 the achievement menu now has a music track of it's own to play.
 updated to a newer version of nvgt.
