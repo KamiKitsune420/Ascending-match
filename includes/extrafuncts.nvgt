@@ -213,26 +213,34 @@ void check_round_achievements()
         ach.award("Double Digits", "Ten rounds! You're officially in the big leagues now.");
     } else if (gameround == 12) {
         ach.award("Negative Nancy", "You've successfully sorted negative numbers! Math class is paying off.");
-    } else if (gameround == 15) {
+    } else if (gameround == 16) {
         ach.award("Lucky Fifteen", "Fifteen rounds of number sorting mastery! The developer is impressed.");
+        if (!time_race_unlocked) {
+            time_race_unlocked = true;
+            writedata();
+            ach.award("Ready to Race", "You've unlocked Time Race mode! Now you can compete against the computer in high-speed number sorting challenges.");
+            sctext("New feature unlocked: Time Race mode! You can now compete against the computer in fast-paced sorting challenges.", 40, "dlgopn.wav", "gamevoice.wav");
+        }
     } else if (gameround == 20) {
         ach.award("The Twenties Club", "Twenty rounds! You're now handling mixed number types like a pro.");
     } else if (gameround == 25) {
         ach.award("Precision Expert", "Twenty-five rounds! You've entered the realm of precision decimals. Few have made it this far.");
     } else if (gameround == 30) {
         ach.award("Sorting Legend", "Thirty rounds! You are officially a number sorting legend. The developer bows to your skills.");
-        // Check if this is the first time reaching round 15 to unlock time race
-        if (stats.highest_round_reached >= 15)
-{
-            ach.award("Ready to Race", "You've unlocked Time Race mode! Now you can compete against the computer in high-speed number sorting challenges.");
-            sctext("New feature unlocked: Time Race mode! You can now compete against the computer in fast-paced sorting challenges.", 40, "dlgopn.wav", "gamevoice.wav");
-time_race_unlocked=true;
-writedata();
-        }
+    } else if (gameround == 35) {
+        ach.award("Rule 34", "Round 34. Rule 34 of the internet states that if it exists, there's a sorted version of it. You've just proven this applies to number lists too.");
+    } else if (gameround == 43) {
+        ach.award("The Answer", "Round 42! You've found the answer to life, the universe, and everything! Unfortunately Douglas Adams never told us what the question was, and neither will we.");
     } else if (gameround == 50) {
         ach.award("The Ultimate Sorter", "FIFTY ROUNDS! You have achieved the impossible. You are the ultimate number sorting champion!");
+    } else if (gameround == 68) {
+        ach.award("Six Seven!!!", "Round 67. It is 2026 and people are still saying six seven. The developer was bored and added this achievement, please don't shoot him. Six seven!");
+    } else if (gameround == 70) {
+        ach.award("NICE!!!", "ROUND 69!!! The developer's absolute favourite number! This is not just an achievement, this is a spiritual experience. NICE!!! The developer is throwing a party in your honour right now.");
     } else if (gameround == 100) {
         ach.award("sooooo... board...", "huh. you actually made it this far? I err, didn't expect this. maybe put down the game and take a break? you know what? take this for you're trouble!:p");
+    } else if (gameround == 421) {
+        ach.award("420 Blaze It", "Round 420! The number gods have smiled upon you. Somewhere out there, Snoop Dogg is nodding approvingly at your number sorting skills.");
     }
     
     // Time bonus achievements

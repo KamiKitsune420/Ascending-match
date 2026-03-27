@@ -1,10 +1,10 @@
 #include"bgt_compat.nvgt"
-pack obj;
+pack_file obj;
 void main()
 {
 string filename=input_box("Simple pack lister", "Enter the path/name to a pack file, such as sounds.dat");
 if(filename=="") exit();
-bool success=obj.open(filename);
+bool success=obj.open(filename, "");
 if(!success)
 {
 alert("error", "Either this file does not exist or it is not a valid pack file");

@@ -17,7 +17,7 @@ tts_load_config(tts_config_str, tts);
 if (sd.d.exists("output_device"))
 {
 int saved_device = sd.read_int("output_device");
-uint device_count = get_sound_output_device_count();
+uint device_count = get_sound_output_devices().length();
 if(saved_device >= 0 && uint(saved_device) < device_count)
 {
 set_sound_output_device(uint(saved_device));

@@ -24,7 +24,7 @@ int gameround;
 int amount;
 int numker;
 int ai_delay = 0; // Move this to global scope
-string version="0.7";
+string version="0.8";
 bool reverse_level = false; // Track if current level is descending order
 int round_time_left = 0;
 int HINT_COOLDOWN = 5000; 
@@ -38,7 +38,7 @@ int hints_used = 0;
 int time_bonus_total = 0; // Total time bonus points accumulated
 double last_calculated_time = 0; // Store last calculated time for bonus calculation
 bool time_race_mode = false; // Track if in time race mode
-bool time_race_unlocked = true;
+bool time_race_unlocked = false;
 double[] computer_nums; // Computer's numbers for time race
 int computer_swaps = 0; // Computer's swap count
 int computer_correct_swaps = 0; // Computer's correct swaps

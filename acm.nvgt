@@ -2,7 +2,6 @@
 void main()
 {
 set_sound_storage("data/sounds.dat");
-set_sound_decryption_key("7nVhy4oVp5LEOZBWXhODm2hI56zSUohj4FzQPhpJNQKd8iR6N2D87WmmNketbe0gArbFEP9TAlhmlRv9bqfI4ip6pRz0na4Zf5y3pBbsMaqDStP1fYY3LPESaJ4s80EtP5scps6ktY0Fh53Dkj3zZZce5N6iQXx9dOqrwYuQcds9awWhDVWkUXzj93KUXSCPnGB3InJeINNDZvdl0yxRBwqzb49NYq8LrWSFne5tWXRNWtvwgPiuiHRw4VcX2G8C8ytbiWyFbp2Ht2Geukp0ZyAicxRLaROgLJIOVLIO1RTHhEA2IviNlR6rDifLVdKQP0Ou3OvkyoT3WpLTIFNwET6hvi04DS42ABb6TBKeu5OOX75cKlvOTnaE1sDCujpeIPMXHMFbS82e9DEbc0J5wFyfPcLLyJdRupnJESCY9LpahC5CF9OuMkl3md4LgoXPvpQhqJNb1eyyQkagTcsMnXpGA4grFAiSXORm", true);
     show_window("AscendingMatch, version "+version);
 readdata();    
     // Award welcome achievement on first play

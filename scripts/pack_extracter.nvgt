@@ -4,7 +4,7 @@ file temp;
 string[] contents;
 string filename;
 string end;
-pack pfile;
+pack_file pfile;
 string string2file(string thing)
 {
 thing=string_replace(thing,"\\","/",true);
@@ -24,7 +24,7 @@ if (get_last_error()==-12)
 {
 exit();
 }
-pfile.open(filename);
+pfile.open(filename, "");
 contents=pfile.list_files();
 alert("get ready",contents.length()+" files are about to be extracted!");
 if (!directory_exists("packs"))

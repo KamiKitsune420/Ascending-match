@@ -78,7 +78,8 @@ class achievement
         }
         
         setupmenu();
-        
+        m.add_music("achmenu.wav");
+
         for (uint i = 0; i < unlocked_achievements.length(); i++) {
             m.add_item(unlocked_achievements[i].title, "achievement_" + i);
         }
@@ -91,6 +92,7 @@ class achievement
             string selected = m.get_item_id(res);
             
             if (res == -1 || selected == "return") {
+                m.fade_music();
                 break;
             }
             
@@ -107,7 +109,7 @@ class achievement
     private void show_achievement_details(uint index)
     {
         achievement_entry@ entry = @unlocked_achievements[index];
-        dlg(entry.title + ". " + entry.description);
+        sctext(entry.title + ". " + entry.description, 40, "dlgopn.wav", "gamevoice.wav");
     }
     
     private void save_achievements()

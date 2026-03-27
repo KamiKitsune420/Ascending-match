@@ -3,12 +3,12 @@ void mainmenu()
 setupmenu(true);
 m.add_item("Play normal game", "pl");
 // Only show time race if player has reached round 15
-if (stats.highest_round_reached >= 15 and time_race_unlocked == true)
+if (time_race_unlocked == true)
 {
     m.add_item("Play time race", "race");
 }
 m.add_item("Help", "hp");
-m.add_item("Achievements", "ach");
+m.add_item("Achievements (" + ach.get_achievement_count() + "/34)", "ach");
 m.add_item("Scoreboard", "sb");
 m.add_item("Options", "op");
 m.add_item("Exit", "ex");
@@ -173,7 +173,7 @@ return;
 void audiooptionsmenu()
 {
 setupmenu();
-array<string>@ output_devices = get_sound_output_devices();
+const string[]@ output_devices = get_sound_output_devices();
 uint current_device = get_sound_output_device();
 string current_device_name = (current_device < output_devices.length()) ? output_devices[current_device] : "Unknown Device";
 m.add_item("Current output device: " + current_device_name, "current");
@@ -219,7 +219,7 @@ return;
 void selectoutputdevice()
 {
 setupmenu();
-array<string>@ output_devices = get_sound_output_devices();
+const string[]@ output_devices = get_sound_output_devices();
 uint current_device = get_sound_output_device();
 for(uint i = 0; i < output_devices.length(); i++)
 {
