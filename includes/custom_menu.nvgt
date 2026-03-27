@@ -251,6 +251,7 @@ music.play_looped();
         while (true)
         {
             wait(5);
+            update_touch();
 if (enable_first_letter_navigation)
 {
     find_first_letter_item(has_focus);

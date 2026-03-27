@@ -20,5 +20,6 @@
 #include"speech.nvgt"
 #include"statistics.nvgt"
 #include"touch.nvgt"
+#include"touch_gestures.nvgt"
 
 typedef uint8 usmall; typedef int8 small;

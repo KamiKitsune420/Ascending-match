@@ -12,7 +12,10 @@ m.add_item("Achievements (" + ach.get_achievement_count() + "/34)", "ach");
 m.add_item("Scoreboard", "sb");
 m.add_item("Options", "op");
 m.add_item("Exit", "ex");
-m.intro_text = "Main menu. Use your navigation keys to move, and press enter to select an option.";
+if (is_touch_platform())
+    m.intro_text = "Main menu. Swipe up or down to move, and double tap to select an option.";
+else
+    m.intro_text = "Main menu. Use your navigation keys to move, and press enter to select an option.";
 int mres = m.run();
 string main = m.get_item_id(mres);
 if(mres==-1)
@@ -37,7 +40,10 @@ if (main == "race")
 {
 m.fade_music();
 sctext("Time Race Mode: You have 25 mixed numbers to sort. The computer is also sorting the same numbers.", 40, "dlgopn.wav", "gamevoice.wav");
-sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Press enter to begin!", 40, "dlgopn.wav", "gamevoice.wav");
+if (is_touch_platform())
+    sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Double tap to begin!", 40, "dlgopn.wav", "gamevoice.wav");
+else
+    sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Press enter to begin!", 40, "dlgopn.wav", "gamevoice.wav");
 gamemus.load("game2.wav");
 gamemus.volume=gamemus_volume;
 gamemus.pitch=85;
@@ -69,8 +75,16 @@ speak("loading");
 m.fade_music();
 sctext("Welcome to Ascending Match!", 30, "dlgopn.wav", "gamevoice.wav");
 sctext("Your goal is to match numbers in ascending order.", 30, "dlgopn.wav", "gamevoice.wav");
+if (is_touch_platform())
+{
+sctext("To navigate the number list, swipe left or right with one finger. Tap once to mark a number.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("When you mark two numbers, they swap. Double tap to confirm actions. Two-finger tap to go back.", 30, "dlgopn.wav", "gamevoice.wav");
+}
+else
+{
 sctext("to do this, use you're left and right arrow keys to navigate in the number list, and press the spacebar to select numbers for marking.", 30, "dlgopn.wav", "gamevoice.wav");
 sctext("When you select two numbers, they swap positions in the list with each other.", 30, "dlgopn.wav", "gamevoice.wav");
+}
 sctext("to learn more, check the readme.", 30, "dlgopn.wav", "gamevoice.wav");
 mainmenu();
 }
@@ -89,7 +103,10 @@ m.add_item("Audio settings", "au");
 m.add_item("Speech settings", "sp");
 m.add_item("Reset scores", "reset");
 m.add_item("Return to main menu", "ret");
-m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";
+if (is_touch_platform())
+    m.intro_text = "Options menu. Swipe up or down to move, and double tap to select an option.";
+else
+    m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";
 int ores = m.run();
 string option = m.get_item_id(ores);
 if(ores==-1)

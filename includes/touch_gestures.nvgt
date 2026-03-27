@@ -1,127 +1,41 @@
 touch_gesture_manager@ touchManager;
-class simple_touch_state : touch_interface
+touch_keyboard_interface@ touchKB;
+
+bool is_touch_platform()
 {
-    bool tapped = false;
-    bool double_tapped = false;
-    bool triple_tapped = false;
-    bool long_pressed = false;
-    bool holding = false;
-    int last_swipe = -1;
-    int last_fingers = 1;
-    simple_touch_state(touch_gesture_manager@ mgr)
-    {
-        super(mgr);
-    }
-    void on_single_tap(touch_screen_finger@ f, uint fc)
-    {
-        tapped = true;
-        last_fingers = fc;
-    }
-    void on_double_tap(touch_screen_finger@ f, uint fc)
-    {
-        double_tapped = true;
-        last_fingers = fc;
-    }
-    void on_tripple_tap(touch_screen_finger@ f, uint fc)
-    {
-        triple_tapped = true;
-        last_fingers = fc;
-    }
-    void on_long_press(touch_screen_finger@ f, uint fc)
-    {
-        long_pressed = true;
-        last_fingers = fc;
-    }
-    void on_hold(touch_screen_finger@ f, uint fc)
-    {
-        holding = true;
-        last_fingers = fc;
-    }
-    void on_swipe(touch_screen_finger@ f, int direction)
-    {
-        last_swipe = direction;
-        last_fingers = max_fingers_in_sequence;
-    }
-    void reset()
-    {
-        tapped = false;
-        double_tapped = false;
-        triple_tapped = false;
-        long_pressed = false;
-        holding = false;
-        last_swipe = -1;
-    }
+    return system_is_mobile;
 }
 
-simple_touch_state@ touch;
-
-void handle_touch_keys()
-{
-    if (@touch == null) return;
-    if (touch.last_fingers == 1)
-    {
-        if (touch.last_swipe == swipe_touch_direction_up)
-            simulate_key_press(KEY_UP);
-        if (touch.last_swipe == swipe_touch_direction_down)
-            simulate_key_press(KEY_DOWN);
-        if (touch.last_swipe == swipe_touch_direction_left)
-            simulate_key_press(KEY_LEFT);
-        if (touch.last_swipe == swipe_touch_direction_right)
-            simulate_key_press(KEY_RIGHT);
-    }
-    if (touch.tapped && touch.last_fingers == 1)
-        simulate_key_press(KEY_SPACE);
-    if (touch.double_tapped && touch.last_fingers == 1)
-        simulate_key_press(KEY_RETURN);
-    if (touch.tapped && touch.last_fingers == 2)
-        simulate_key_press(KEY_ESCAPE);
-    if (touch.last_fingers == 2)
-    {
-        if (touch.last_swipe == swipe_touch_direction_up)
-            simulate_key_press(KEY_PAGEUP);
-        if (touch.last_swipe == swipe_touch_direction_down)
-            simulate_key_press(KEY_PAGEDOWN);
-        if (touch.last_swipe == swipe_touch_direction_left)
-            simulate_key_press(KEY_HOME);
-        if (touch.last_swipe == swipe_touch_direction_right)
-            simulate_key_press(KEY_END);
-    }
-    if (touch.long_pressed && touch.last_fingers == 1)
-        simulate_key_down(KEY_LSHIFT);
-    if (!touch.holding)
-        simulate_key_up(KEY_LSHIFT);
-    if (touch.holding && touch.last_fingers == 1)
-        simulate_key_down(KEY_LCTRL);
-    else
-        simulate_key_up(KEY_LCTRL);
-    if (touch.tapped && touch.last_fingers == 3)
-        simulate_key_press(KEY_TAB);
-    if (touch.double_tapped && touch.last_fingers == 3)
-        simulate_key_press(KEY_CAPSLOCK);
-    if (touch.last_fingers == 3)
-    {
-        if (touch.last_swipe == swipe_touch_direction_up)
-            simulate_key_press(KEY_VOLUMEUP);
-        if (touch.last_swipe == swipe_touch_direction_down)
-            simulate_key_press(KEY_VOLUMEDOWN);
-        if (touch.last_swipe == swipe_touch_direction_left)
-            simulate_key_press(KEY_MEDIA_PREVIOUS_TRACK);
-        if (touch.last_swipe == swipe_touch_direction_right)
-            simulate_key_press(KEY_MEDIA_NEXT_TRACK);
-    }
-    touch.reset();
-}
 void init_touch()
 {
     @touchManager = touch_gesture_manager();
-    @touch = simple_touch_state(touchManager);
-    touchManager.add_touch_interface(touch);
+    dictionary keymap;
+    // 1-finger gestures
+    keymap.set("swipe_left1f", KEY_LEFT);
+    keymap.set("swipe_right1f", KEY_RIGHT);
+    keymap.set("swipe_up1f", KEY_UP);
+    keymap.set("swipe_down1f", KEY_DOWN);
+    keymap.set("single_tap1f", KEY_SPACE);      // mark number
+    keymap.set("double_tap1f", KEY_RETURN);     // confirm / advance dialog
+    keymap.set("triple_tap1f", KEY_C);          // copy text (dlg copy)
+    keymap.set("long_press1f", KEY_H);          // hint
+    // 2-finger gestures
+    keymap.set("single_tap2f", KEY_ESCAPE);     // back / exit
+    keymap.set("double_tap2f", KEY_P);          // pause / unpause
+    keymap.set("long_press2f", KEY_T);          // announce time remaining
+    keymap.set("swipe_up2f", KEY_PAGEUP);       // volume up
+    keymap.set("swipe_down2f", KEY_PAGEDOWN);   // volume down
+    keymap.set("swipe_left2f", KEY_HOME);       // jump to first number
+    keymap.set("swipe_right2f", KEY_END);       // jump to last number
+    // 3-finger gestures
+    keymap.set("single_tap3f", KEY_TAB);        // re-read menu title
+    keymap.set("double_tap3f", KEY_F3);         // search in menu
+    @touchKB = touch_keyboard_interface(touchManager, keymap);
+    touchManager.add_touch_interface(touchKB);
 }
+
 void update_touch()
 {
     if (@touchManager != null)
-    {
         touchManager.monitor();
-        handle_touch_keys();
-    }
 }

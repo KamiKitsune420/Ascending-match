@@ -2,6 +2,7 @@
 void main()
 {
 set_sound_storage("data/sounds.dat");
+init_touch();
     show_window("AscendingMatch, version "+version);
 readdata();    
     // Award welcome achievement on first play
@@ -10,7 +11,10 @@ readdata();
     }
     
     wait(500);
-    speak("Press enter to start.");
+    if (is_touch_platform())
+        speak("Double tap to start.");
+    else
+        speak("Press enter to start.");
     dlgplay("TITLEBIT.wav");
     mainmenu();
 }

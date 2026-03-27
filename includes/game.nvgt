@@ -3,6 +3,7 @@ void game()
     while (true)
     {
         wait(5);
+        update_touch();
         
         // Run computer AI if in time race mode
         if (time_race_mode) {

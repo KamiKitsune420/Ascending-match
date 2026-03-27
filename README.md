@@ -10,14 +10,15 @@
 2. [Getting Started](#2-getting-started)
 3. [Main Menu Guide](#3-main-menu-guide)
 4. [Gameplay Manual](#4-gameplay-manual)
-5. [Difficulty Progression](#5-difficulty-progression)
-6. [Scoreboard System](#6-scoreboard-system)
-7. [Options & Settings](#7-options--settings)
-8. [Accessibility Features](#8-accessibility-features)
-9. [Tips & Strategies](#9-tips--strategies)
-10. [Technical Information](#10-technical-information)
-11. [Troubleshooting](#11-troubleshooting)
-12. [Credits & Acknowledgments](#12-credits--acknowledgments)
+5. [Touch Controls (iOS & Android)](#5-touch-controls-ios--android)
+6. [Difficulty Progression](#6-difficulty-progression)
+7. [Scoreboard System](#7-scoreboard-system)
+8. [Options & Settings](#8-options--settings)
+9. [Accessibility Features](#9-accessibility-features)
+10. [Tips & Strategies](#10-tips--strategies)
+11. [Technical Information](#11-technical-information)
+12. [Troubleshooting](#12-troubleshooting)
+13. [Credits & Acknowledgments](#13-credits--acknowledgments)
 
 ---
 
@@ -45,11 +46,19 @@
 
 ### First Launch
 
+**On desktop (Windows/Mac/Linux):**
 1. Run the game executable
 2. Wait for the title audio sequence
 3. Press **Enter** when prompted to access the main menu
 4. Use **Up/Down arrows** to navigate menus
 5. Press **Enter** to select options
+
+**On mobile (iOS/Android):**
+1. Launch the app
+2. Wait for the title audio sequence
+3. **Double tap** when prompted to access the main menu
+4. **Swipe up/down** with one finger to navigate menus
+5. **Double tap** to select options
 
 ### Audio Setup
 
@@ -148,7 +157,57 @@ Each round begins with:
 
 ---
 
-## 5. Difficulty Progression
+## 5. Touch Controls (iOS & Android)
+
+On mobile platforms the game automatically speaks gesture instructions instead of keyboard instructions. Every keyboard shortcut has a touch gesture equivalent — you never need a physical keyboard.
+
+### Navigation Gestures
+
+| Gesture | Action |
+|---|---|
+| Swipe left (1 finger) | Move left / previous item |
+| Swipe right (1 finger) | Move right / next item |
+| Swipe up (1 finger) | Move up in menu |
+| Swipe down (1 finger) | Move down in menu |
+| 2-finger swipe left | Jump to first number (Home) |
+| 2-finger swipe right | Jump to last number (End) |
+
+### Action Gestures
+
+| Gesture | Action |
+|---|---|
+| Single tap (1 finger) | Mark / unmark a number (Spacebar) |
+| Double tap (1 finger) | Confirm / advance dialog (Enter) |
+| Triple tap (1 finger) | Copy dialog text to clipboard (C) |
+| Single tap (2 fingers) | Go back / exit menu (Escape) |
+| Double tap (2 fingers) | Pause / unpause game (P) |
+
+### Information Gestures
+
+| Gesture | Action |
+|---|---|
+| Long press (1 finger) | Hint — how many numbers are in the right spot (H) |
+| Long press (2 fingers) | Announce time remaining (T) |
+
+### Volume & Menu Gestures
+
+| Gesture | Action |
+|---|---|
+| 2-finger swipe up | Volume up (Page Up) |
+| 2-finger swipe down | Volume down (Page Down) |
+| Single tap (3 fingers) | Re-read menu title / current item (Tab) |
+| Double tap (3 fingers) | Search for a menu item (F3) |
+
+### Tips for Touch Play
+
+- All gestures work in both menus and during gameplay
+- The hint long press has a cooldown — you will be told if it is not ready yet
+- When two numbers are marked, they swap automatically; no extra confirmation needed
+- In dialogs, swipe in any direction with one finger to have the message re-read to you
+
+---
+
+## 6. Difficulty Progression
 
 ### Number Types by Round
 
@@ -204,7 +263,7 @@ Each round begins with:
 
 ---
 
-## 6. Scoreboard System
+## 7. Scoreboard System
 
 ### Local High Scores
 
@@ -252,7 +311,7 @@ The game intelligently analyzes each swap:
 
 ---
 
-## 7. Options & Settings
+## 8. Options & Settings
 
 ### Speech Settings
 
@@ -304,7 +363,7 @@ The game intelligently analyzes each swap:
 
 ---
 
-## 8. Accessibility Features
+## 9. Accessibility Features
 
 ### Screen Reader Support
 
@@ -343,7 +402,7 @@ The game intelligently analyzes each swap:
 
 ---
 
-## 9. Tips & Strategies
+## 10. Tips & Strategies
 
 ### Mental Strategies
 
@@ -397,15 +456,22 @@ The game intelligently analyzes each swap:
 
 ---
 
-## 10. Technical Information
+## 11. Technical Information
 
 ### System Requirements
 
-- **Operating System**: Windows 7/8/10/11
+**Desktop**
+- **Operating System**: Windows 7/8/10/11, macOS, Linux
 - **Audio**: Any DirectSound-compatible audio device
 - **Input**: Standard PC keyboard
 - **Storage**: ~50MB for game files and data
 - **Memory**: Minimal RAM requirements (~10MB runtime)
+
+**Mobile**
+- **iOS**: iPhone or iPad running iOS 14 or later
+- **Android**: Android 8.0 or later
+- **Input**: Touch screen (no keyboard required)
+- **Audio**: Device speaker or headphones
 
 ### File Structure
 
@@ -445,7 +511,7 @@ Ascending-match/
 
 ---
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 ### Audio Issues
 
@@ -509,7 +575,7 @@ Ascending-match/
 
 ---
 
-## 12. Credits & Acknowledgments
+## 13. Credits & Acknowledgments
 
 ### Development Team
 

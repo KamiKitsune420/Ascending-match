@@ -19,6 +19,7 @@ void sctext(string txt, int ms, string opnsnd, string scsound)
     speak(txt);
     while (txpos < words.length())
     {
+        update_touch();
         if (sctimer.elapsed >= ms)
         {
             p.play_stationary(scsound, false);
@@ -36,6 +37,7 @@ void sctext(string txt, int ms, string opnsnd, string scsound)
     while (!key_pressed(KEY_RETURN))
     {
         wait(5);
+        update_touch();
     }
     // Play sound when Enter is pressed
     p.play_stationary("dlg.wav", false);
@@ -48,6 +50,7 @@ speak(message);
 while(true)
 {
 wait(5);
+update_touch();
 if (timeout>-1 and timeouter.elapsed>=timeout)
 return;
 if (key_repeating(KEY_C) and dlgcoppy==true)
@@ -76,6 +79,7 @@ dlgaudio.play();
 while(dlgaudio.playing)
 {
 wait(5);
+update_touch();
 if(key_repeating(KEY_RETURN) and skippable==true or key_down(KEY_A) and skippable==true)
 {
     p.play_stationary("titskip.wav", false);
