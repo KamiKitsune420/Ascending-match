@@ -5,8 +5,8 @@ sound@ currentTrack;
 bool isGame1 = true;
 
 void main() {
-	game1.load("../sounds/game1.wav");
-	game2.load("../sounds/game2.wav");
+	game1.load("../sounds/game1.ogg");
+	game2.load("../sounds/game2.ogg");
 
 	@currentTrack = game1;
 	currentTrack.set_volume(100);

@@ -8,7 +8,7 @@ if (time_race_unlocked == true)
     m.add_item("Play time race", "race");
 }
 m.add_item("Help", "hp");
-m.add_item("Achievements (" + ach.get_achievement_count() + "/34)", "ach");
+m.add_item("Achievements (" + ach.get_achievement_count() + "/" + ach.get_total_count() + ")", "ach");
 m.add_item("Scoreboard", "sb");
 m.add_item("Options", "op");
 m.add_item("Exit", "ex");
@@ -28,7 +28,7 @@ if (main == "pl")
 {
 speak("loading");
 m.fade_music();
-gamemus.load("game1.wav");
+gamemus.load("game1.ogg");
 gamemus.volume=gamemus_volume;
 gamemus.pitch=85;
 gamemus.play_looped();
@@ -39,12 +39,12 @@ game();
 if (main == "race")
 {
 m.fade_music();
-sctext("Time Race Mode: You have 25 mixed numbers to sort. The computer is also sorting the same numbers.", 40, "dlgopn.wav", "gamevoice.wav");
+sctext("Time Race Mode: You have 25 mixed numbers to sort. The computer is also sorting the same numbers.", 40, "dlgopn.ogg", "gamevoice.ogg");
 if (is_touch_platform())
-    sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Double tap to begin!", 40, "dlgopn.wav", "gamevoice.wav");
+    sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Double tap to begin!", 40, "dlgopn.ogg", "gamevoice.ogg");
 else
-    sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Press enter to begin!", 40, "dlgopn.wav", "gamevoice.wav");
-gamemus.load("game2.wav");
+    sctext("This is a RACE - whoever finishes first wins! No time limit, no hints available. Press enter to begin!", 40, "dlgopn.ogg", "gamevoice.ogg");
+gamemus.load("game2.ogg");
 gamemus.volume=gamemus_volume;
 gamemus.pitch=85;
 gamemus.play_looped();
@@ -73,19 +73,19 @@ if (main == "hp")
 {
 speak("loading");
 m.fade_music();
-sctext("Welcome to Ascending Match!", 30, "dlgopn.wav", "gamevoice.wav");
-sctext("Your goal is to match numbers in ascending order.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("Welcome to Ascending Match!", 30, "dlgopn.ogg", "gamevoice.ogg");
+sctext("Your goal is to match numbers in ascending order.", 30, "dlgopn.ogg", "gamevoice.ogg");
 if (is_touch_platform())
 {
-sctext("To navigate the number list, swipe left or right with one finger. Tap once to mark a number.", 30, "dlgopn.wav", "gamevoice.wav");
-sctext("When you mark two numbers, they swap. Double tap to confirm actions. Two-finger tap to go back.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("To navigate the number list, swipe left or right with one finger. Tap once to mark a number.", 30, "dlgopn.ogg", "gamevoice.ogg");
+sctext("When you mark two numbers, they swap. Double tap to confirm actions. Two-finger tap to go back.", 30, "dlgopn.ogg", "gamevoice.ogg");
 }
 else
 {
-sctext("to do this, use you're left and right arrow keys to navigate in the number list, and press the spacebar to select numbers for marking.", 30, "dlgopn.wav", "gamevoice.wav");
-sctext("When you select two numbers, they swap positions in the list with each other.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("to do this, use you're left and right arrow keys to navigate in the number list, and press the spacebar to select numbers for marking.", 30, "dlgopn.ogg", "gamevoice.ogg");
+sctext("When you select two numbers, they swap positions in the list with each other.", 30, "dlgopn.ogg", "gamevoice.ogg");
 }
-sctext("to learn more, check the readme.", 30, "dlgopn.wav", "gamevoice.wav");
+sctext("to learn more, check the readme.", 30, "dlgopn.ogg", "gamevoice.ogg");
 mainmenu();
 }
 if (main == "ex")
@@ -100,13 +100,11 @@ void optionsmenu()
 {
 setupmenu();
 m.add_item("Audio settings", "au");
-m.add_item("Speech settings", "sp");
+if (!is_touch_platform())
+    m.add_item("Speech settings", "sp");
 m.add_item("Reset scores", "reset");
 m.add_item("Return to main menu", "ret");
-if (is_touch_platform())
-    m.intro_text = "Options menu. Swipe up or down to move, and double tap to select an option.";
-else
-    m.intro_text = "Options menu. Use your navigation keys to move, and press enter to select an option.";
+m.intro_text = "Options menu. " + menu_hint();
 int ores = m.run();
 string option = m.get_item_id(ores);
 if(ores==-1)
@@ -158,7 +156,7 @@ if (!use_sr)
 m.add_item("Configure SAPI voice", "config");
 }
 m.add_item("Return to options", "ret");
-m.intro_text = "Speech settings menu. Use your navigation keys to move, and press enter to select an option.";
+m.intro_text = "Speech settings menu. " + menu_hint();
 int sres = m.run();
 string speechoption = m.get_item_id(sres);
 if(sres==-1)
@@ -198,7 +196,7 @@ m.add_item("Select output device", "select");
 m.add_item("Game music volume: " + gamemus_volume, "volume");
 m.add_item("Stereo positioning: " + (stereo_positioning ? "On" : "Off"), "stereo");
 m.add_item("Return to options", "ret");
-m.intro_text = "Audio settings menu. Use your navigation keys to move, and press enter to select an option.";
+m.intro_text = "Audio settings menu. " + menu_hint();
 int ares = m.run();
 string audiooption = m.get_item_id(ares);
 if(ares==-1)
@@ -248,7 +246,7 @@ device_name += " (Current)";
 m.add_item(device_name, "" + i);
 }
 m.add_item("Cancel", "cancel");
-m.intro_text = "Select an audio output device. Use your navigation keys to move, and press enter to select.";
+m.intro_text = "Select an audio output device. " + menu_hint();
 int deres = m.run();
 string deviceoption = m.get_item_id(deres);
 if(deres==-1 or deviceoption == "cancel")

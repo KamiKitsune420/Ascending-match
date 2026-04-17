@@ -1,3 +1,8 @@
+New in 0.9
+lowered the volume for some sounds and music
+fixed some music fading bugs
+changed how achievements are stored
+the android version now works, note that it is unstable
 New in 0.8
 the game has been compiled for ios and it works! yay!
 added some new achievements

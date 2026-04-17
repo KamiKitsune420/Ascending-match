@@ -4,7 +4,7 @@ int gameround;
 int amount;
 int numker;
 int ai_delay = 0; // Move this to global scope
-string version="0.8";
+string version="0.9";
 bool reverse_level = false; // Track if current level is descending order
 int round_time_left = 0;
 int HINT_COOLDOWN = 5000; 

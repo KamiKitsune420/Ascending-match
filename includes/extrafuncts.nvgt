@@ -1,3 +1,10 @@
+string menu_hint()
+{
+    if (is_touch_platform())
+        return "Swipe up or down to move, and double tap to select.";
+    return "Use your navigation keys to move, and press enter to select.";
+}
+
 bool is_beneficial_swap(int pos1, int pos2)
 {
     // Create a sorted copy to compare against
@@ -140,20 +147,30 @@ string format_number_for_speech(double num)
 
 string audio_name_entry()
 {
-    sctext("High score achieved! Time to enter your name.", 40, "dlgopn.wav", "gamevoice.wav");
-    
+    sctext("High score achieved! Time to enter your name.", 40, "dlgopn.ogg", "gamevoice.ogg");
+
+    if (is_touch_platform()) {
+        string name = input_box("High Score!", "Enter your name:", "");
+        if (name.length() == 0) {
+            speak("Using Anonymous.");
+            return "Anonymous";
+        }
+        speak("Name confirmed: " + name);
+        return name;
+    }
+
     audio_form f;
     f.create_window("High Score!");
     int name_input = f.create_input_box("Enter your name:", "", "", 20);
     int ok_button = f.create_button("OK", true);
     int cancel_button = f.create_button("Cancel", false, true);
-    
+
     f.focus(name_input);
-    
+
     while (true) {
         wait(5);
         f.monitor();
-        
+
         if (f.is_pressed(ok_button)) {
             string name = f.get_text(name_input);
             if (name.length() > 0) {
@@ -164,14 +181,13 @@ string audio_name_entry()
                 f.focus(name_input);
             }
         }
-        
+
         if (f.is_pressed(cancel_button)) {
             speak("Name entry cancelled. Using Anonymous.");
             return "Anonymous";
         }
     }
-    
-    // Fallback (should never reach here)
+
     return "Anonymous";
 }
 
@@ -180,11 +196,11 @@ void play_curmove_sound()
 if (stereo_positioning && nums.length() > 1)
 {
 float pan = -100.0 + (200.0 * numker / (nums.length() - 1));
-p.play_stationary_extended("curmove.wav", false, 0, pan, 0.0, 100.0);
+p.play_stationary_extended("curmove.ogg", false, 0, pan, 0.0, 100.0);
 }
 else
 {
-p.play_stationary("curmove.wav", false);
+p.play_stationary("curmove.ogg", false);
 }
 }
 
@@ -193,70 +209,70 @@ void play_edge_sound()
 if (stereo_positioning && nums.length() > 1)
 {
 float pan = -100.0 + (200.0 * numker / (nums.length() - 1));
-p.play_stationary_extended("curedge.wav", false, 0, pan, 0.0, 100.0);
+p.play_stationary_extended("curedge.ogg", false, 0, pan, 0.0, 100.0);
 }
 else
 {
-p.play_stationary("curedge.wav", false);
+p.play_stationary("curedge.ogg", false);
 }
 }
 
 void check_round_achievements()
 {
     if (gameround == 2) {
-        ach.award("First Steps", "You completed your first round! You're getting the hang of this number sorting business.");
+        ach.award("First Steps");
     } else if (gameround == 5) {
-        ach.award("Getting Warmed Up", "Five rounds completed! The numbers are getting trickier, but you're keeping up.");
+        ach.award("Getting Warmed Up");
     } else if (gameround == 8) {
-        ach.award("Decimal Master", "You've mastered the basics and conquered your first decimal numbers!");
+        ach.award("Decimal Master");
     } else if (gameround == 10) {
-        ach.award("Double Digits", "Ten rounds! You're officially in the big leagues now.");
+        ach.award("Double Digits");
     } else if (gameround == 12) {
-        ach.award("Negative Nancy", "You've successfully sorted negative numbers! Math class is paying off.");
+        ach.award("Negative Nancy");
     } else if (gameround == 16) {
-        ach.award("Lucky Fifteen", "Fifteen rounds of number sorting mastery! The developer is impressed.");
+        ach.award("Lucky Fifteen");
         if (!time_race_unlocked) {
             time_race_unlocked = true;
             writedata();
-            ach.award("Ready to Race", "You've unlocked Time Race mode! Now you can compete against the computer in high-speed number sorting challenges.");
-            sctext("New feature unlocked: Time Race mode! You can now compete against the computer in fast-paced sorting challenges.", 40, "dlgopn.wav", "gamevoice.wav");
+            ach.award("Ready to Race");
+            sctext("New feature unlocked: Time Race mode! You can now compete against the computer in fast-paced sorting challenges.", 40, "dlgopn.ogg", "gamevoice.ogg");
         }
     } else if (gameround == 20) {
-        ach.award("The Twenties Club", "Twenty rounds! You're now handling mixed number types like a pro.");
+        ach.award("The Twenties Club");
     } else if (gameround == 25) {
-        ach.award("Precision Expert", "Twenty-five rounds! You've entered the realm of precision decimals. Few have made it this far.");
+        ach.award("Precision Expert");
     } else if (gameround == 30) {
-        ach.award("Sorting Legend", "Thirty rounds! You are officially a number sorting legend. The developer bows to your skills.");
+        ach.award("Sorting Legend");
     } else if (gameround == 35) {
-        ach.award("Rule 34", "Round 34. Rule 34 of the internet states that if it exists, there's a sorted version of it. You've just proven this applies to number lists too.");
+        ach.award("Rule 34");
     } else if (gameround == 43) {
-        ach.award("The Answer", "Round 42! You've found the answer to life, the universe, and everything! Unfortunately Douglas Adams never told us what the question was, and neither will we.");
+        ach.award("The Answer");
     } else if (gameround == 50) {
-        ach.award("The Ultimate Sorter", "FIFTY ROUNDS! You have achieved the impossible. You are the ultimate number sorting champion!");
+        ach.award("The Ultimate Sorter");
     } else if (gameround == 68) {
-        ach.award("Six Seven!!!", "Round 67. It is 2026 and people are still saying six seven. The developer was bored and added this achievement, please don't shoot him. Six seven!");
+        ach.award("Six Seven!!!");
     } else if (gameround == 70) {
-        ach.award("NICE!!!", "ROUND 69!!! The developer's absolute favourite number! This is not just an achievement, this is a spiritual experience. NICE!!! The developer is throwing a party in your honour right now.");
+        ach.award("NICE!!!");
     } else if (gameround == 100) {
-        ach.award("sooooo... board...", "huh. you actually made it this far? I err, didn't expect this. maybe put down the game and take a break? you know what? take this for you're trouble!:p");
+        ach.award("sooooo... board...");
     } else if (gameround == 421) {
-        ach.award("420 Blaze It", "Round 420! The number gods have smiled upon you. Somewhere out there, Snoop Dogg is nodding approvingly at your number sorting skills.");
+        ach.award("420 Blaze It");
     }
-    
+
     // Time bonus achievements
     if (time_bonus_total >= 100) {
-        ach.award("Speedy Sorter", "You've earned your first 100 time bonus points! Your quick thinking is paying off.");
+        ach.award("Speedy Sorter");
     }
     if (time_bonus_total >= 500) {
-        ach.award("Lightning Fast", "500 time bonus points! You're consistently completing rounds at impressive speed.");
+        ach.award("Lightning Fast");
     }
     if (time_bonus_total >= 1000) {
-        ach.award("Time Master", "1000 time bonus points! You've mastered the art of rapid number sorting.");
+        ach.award("Time Master");
     }
-    
-    // Fraction milestone achievements
+
+    // Fraction milestone
     if (gameround == 20) {
-        ach.award("Fraction Pioneer", "You've reached round 20 and encountered your first fractions! Math class is really paying off now.");
+        ach.award("Fraction Pioneer");
     }
 }
 
@@ -273,52 +289,51 @@ void handle_game_over()
     }
     stats += ".";
     
-    sctext(stats, 40, "dlgopn.wav", "gamevoice.wav");
+    sctext(stats, 40, "dlgopn.ogg", "gamevoice.ogg");
     
     // Check for accuracy achievements
     if (total_swaps > 0) {
         if (accuracy >= 90.0) {
-            ach.award("Precision Player", "You achieved 90% or higher accuracy! Your sorting skills are incredibly precise.");
+            ach.award("Precision Player");
         } else if (accuracy >= 75.0) {
-            ach.award("Accurate Sorter", "You achieved 75% or higher accuracy! Most of your swaps were beneficial.");
+            ach.award("Accurate Sorter");
         } else if (accuracy >= 50.0) {
-            ach.award("Getting Better", "You achieved 50% or higher accuracy! You're learning the optimal sorting strategies.");
+            ach.award("Getting Better");
         } else if (accuracy == 0.0) {
-            ach.award("Master of Chaos", "Congratulations! You achieved 0% accuracy. Every single swap made things worse. This is actually impressive in its own special way. Maybe try the opposite of what you think next time?");
+            ach.award("Master of Chaos");
         }
-        
+
         if (total_swaps >= 100) {
-            ach.award("Swap Master", "You made 100 or more swaps! That's a lot of number rearranging.");
+            ach.award("Swap Master");
         }
-        
         if (total_swaps >= 500) {
-            ach.award("Swap Maniac", "You made 500 or more swaps! You really love moving those numbers around.");
+            ach.award("Swap Maniac");
         }
     } else if (total_swaps == 0) {
-        ach.award("The Great Contemplator", "You sat through an entire round without making a single swap. Were you meditating? Taking a nap? Or perhaps you're playing some advanced form of number zen that us mere mortals don't understand. Either way, that's dedication to doing absolutely nothing!");
+        ach.award("The Great Contemplator");
     }
-    
+
     // Check for hint achievements
     if (hints_used == 0 && total_swaps > 0) {
-        ach.award("The Independent Thinker", "You completed the game without using a single hint! Either you're incredibly skilled, or you're too proud to ask for help. We respect both possibilities.");
+        ach.award("The Independent Thinker");
     } else if (hints_used > 5) {
-        ach.award("The Hint Addict", "You used more than 5 hints in a single game! At this point, the game is practically playing itself. Maybe next time try trusting your own brain a little more? It's not as scary as it seems, we promise!");
+        ach.award("The Hint Addict");
     }
     
     // Record game completion statistics
     // stats.record_game_completion(gameround - 1, accuracy, time_bonus_total, gameround);
     
     // Check if this is a high score
-    if (cb.is_high_score(gameround, accuracy) && total_swaps > 0) {
+    if (cb.is_high_score(gameround, accuracy, time_bonus_total) && total_swaps > 0) {
         string player_name = audio_name_entry();
         
         if (player_name != "") {
             string game_mode = time_race_mode ? "Time Race" : "Normal";
             cb.add_localscore(player_name, gameround, total_swaps, correct_swaps, time_bonus_total, game_mode);
-            sctext("Your score has been saved to the leaderboard!", 30, "dlgopn.wav", "gamevoice.wav");
+            sctext("Your score has been saved to the leaderboard!", 30, "dlgopn.ogg", "gamevoice.ogg");
         }
     } else {
-        sctext("Thanks for playing! Try again to beat the high scores.", 30, "dlgopn.wav", "gamevoice.wav");
+        sctext("Thanks for playing! Try again to beat the high scores.", 30, "dlgopn.ogg", "gamevoice.ogg");
     }
 }
 
@@ -416,19 +431,19 @@ void computer_ai_step()
                 
                 // Announce progress milestones
                 if (progress_percent >= 20.0 && !computer_progress_announced[0]) {
-                    p.play_stationary("wrn.wav", false);
+                    p.play_stationary("wrn.ogg", false);
                     speak("Alert! The computer is 20 percent done, watch out!");
                     computer_progress_announced[0] = true;
                 } else if (progress_percent >= 40.0 && !computer_progress_announced[1]) {
-                    p.play_stationary("wrn.wav", false);
+                    p.play_stationary("wrn.ogg", false);
                     speak("Alert! The computer is 40 percent done, watch out!");
                     computer_progress_announced[1] = true;
                 } else if (progress_percent >= 60.0 && !computer_progress_announced[2]) {
-                    p.play_stationary("wrn.wav", false);
+                    p.play_stationary("wrn.ogg", false);
                     speak("Alert! The computer is 60 percent done, watch out!");
                     computer_progress_announced[2] = true;
                 } else if (progress_percent >= 80.0 && !computer_progress_announced[3]) {
-                    p.play_stationary("wrn.wav", false);
+                    p.play_stationary("wrn.ogg", false);
                     speak("Alert! The computer is 80 percent done, watch out!");
                     computer_progress_announced[3] = true;
                 }

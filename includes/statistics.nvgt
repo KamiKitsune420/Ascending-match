@@ -98,7 +98,7 @@ class game_statistics
         }
         m.add_item("Time race win rate: " + win_rate, "race_wins");
         m.add_item("Return", "return");
-        m.intro_text = "Your game statistics. Use your navigation keys to browse.";
+        m.intro_text = "Your game statistics. " + menu_hint();
         
         while (true) {
             int res = m.run();

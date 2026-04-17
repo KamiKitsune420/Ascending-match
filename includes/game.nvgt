@@ -15,8 +15,9 @@ void game()
                 double player_accuracy = total_swaps > 0 ? (double(correct_swaps) / double(total_swaps)) * 100.0 : 0.0;
                 double computer_accuracy = computer_swaps > 0 ? (double(computer_correct_swaps) / double(computer_swaps)) * 100.0 : 0.0;
                 
-                p.play_stationary("gameover.wav", false);
+                p.play_stationary("gameover.ogg", false);
                 fade(gamemus);
+                gamemus.stop();
                 speak("Computer finished first! Computer wins the race!");
                 wait(1000);
                 
@@ -24,7 +25,7 @@ void game()
                 results += "Computer made " + computer_swaps + " swaps with " + format_float(computer_accuracy, "", 0, 1) + " percent accuracy. ";
                 results += "You made " + total_swaps + " swaps with " + format_float(player_accuracy, "", 0, 1) + " percent accuracy. Better luck next time!";
                 
-                sctext(results, 40, "dlgopn.wav", "gamevoice.wav");
+                sctext(results, 40, "dlgopn.ogg", "gamevoice.ogg");
                 time_race_mode = false;
                 mainmenu();
                 return;
@@ -86,7 +87,7 @@ void game()
             if (!time_race_mode && round_time_left <= 0) {
                 gamemus.stop();
                 speak("Time's up. Game over.");
-                p.play_stationary("gameover.wav", false);
+                p.play_stationary("gameover.ogg", false);
                 wait(1000);
                 handle_game_over();
                 mainmenu();
@@ -160,7 +161,7 @@ else if(key_repeating(KEY_PAGEDOWN))
                     correct_swaps++;
                 }
                 
-                p.play_stationary("swap.wav", false);
+                p.play_stationary("swap.ogg", false);
                 speak("Swapped");
                 for (int i = 0; i < int(marknums.length()); i++)
                     marknums[i] = false;
@@ -187,8 +188,9 @@ else if(key_repeating(KEY_PAGEDOWN))
                         double player_accuracy = total_swaps > 0 ? (double(correct_swaps) / double(total_swaps)) * 100.0 : 0.0;
                         double computer_accuracy = computer_swaps > 0 ? (double(computer_correct_swaps) / double(computer_swaps)) * 100.0 : 0.0;
                         
-                        p.play_stationary("nextround.wav", false);
+                        p.play_stationary("nextround.ogg", false);
                         fade(gamemus);
+                        gamemus.stop();
                         speak("Congratulations! You finished first and won the race!");
                         wait(1000);
                         
@@ -198,9 +200,9 @@ else if(key_repeating(KEY_PAGEDOWN))
                         results += "Computer made " + computer_swaps + " swaps with " + format_float(computer_accuracy, "", 0, 1) + " percent accuracy but didn't finish. ";
                         results += "Congratulations on your victory!";
                         
-                        ach.award("Human Supremacy", "You defeated the computer in a time race! Human intelligence prevails!");
+                        ach.award("Human Supremacy");
                         
-                        sctext(results, 40, "dlgopn.wav", "gamevoice.wav");
+                        sctext(results, 40, "dlgopn.ogg", "gamevoice.ogg");
                         time_race_mode = false; // Exit race mode
                         mainmenu();
                         return;
@@ -217,17 +219,17 @@ else if(key_repeating(KEY_PAGEDOWN))
                             time_bonus_total += time_bonus;
                         }
                         
-                        p.play_stationary("nextround.wav", false);
+                        p.play_stationary("nextround.ogg", false);
                         string completion_message = "Round complete!";
                         if (time_bonus > 0) {
                             completion_message += " Time bonus: " + time_bonus + " points!";
                             
                             // Single round time bonus achievements
                             if (time_bonus >= 50) {
-                                ach.award("Speed Demon", "You earned 50+ time bonus points in a single round! That's some serious speed sorting.");
+                                ach.award("Speed Demon");
                             }
                             if (time_bonus >= 100) {
-                                ach.award("Rocket Sorter", "100+ time bonus points in one round! You're sorting numbers faster than the speed of sound.");
+                                ach.award("Rocket Sorter");
                             }
                         }
                         speak(completion_message);
@@ -245,10 +247,10 @@ else if(key_repeating(KEY_PAGEDOWN))
                 }
             } else {
                 if (marknums[numker]) {
-                    p.play_stationary("marked.wav", false);
+                    p.play_stationary("marked.ogg", false);
                     speak("Marked");
                 } else {
-                    p.play_stationary("unmarked.wav", false);
+                    p.play_stationary("unmarked.ogg", false);
                     speak("Unmarked");
                 }
             }
@@ -260,7 +262,7 @@ else if(key_repeating(KEY_PAGEDOWN))
             } else if (hint_timer.elapsed < HINT_COOLDOWN) {
                 int secondsLeft = (HINT_COOLDOWN - hint_timer.elapsed) / 1000;
                 speak("You can't use a hint yet. Please wait " + secondsLeft + " more second" + (secondsLeft == 1 ? "" : "s") + ".");
-                p.play_stationary("hinterror.wav", false);
+                p.play_stationary("hinterror.ogg", false);
             } else {
                 int correct = 0;
                 int wrong = 0;
@@ -283,7 +285,7 @@ else if(key_repeating(KEY_PAGEDOWN))
                 }
 
                 speak(correct + " number" + (correct == 1 ? " is" : "s are") + " in the correct spot. " + wrong + " " + (wrong == 1 ? "is" : " are") + " out of place.");
-                p.play_stationary("hint.wav", false);
+                p.play_stationary("hint.ogg", false);
                 
                 hints_used++;
                 hint_timer.restart(); 

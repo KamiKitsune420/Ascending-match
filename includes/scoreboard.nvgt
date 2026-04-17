@@ -7,8 +7,9 @@ class score_entry
     int total_swaps;
     int correct_swaps;
     int time_bonus;
+    int total_score; // round_reached * 1000 + time_bonus
     string game_mode; // "Normal" or "Time Race"
-    
+
     score_entry()
     {
         player_name = "";
@@ -18,9 +19,10 @@ class score_entry
         total_swaps = 0;
         correct_swaps = 0;
         time_bonus = 0;
+        total_score = 0;
         game_mode = "Normal";
     }
-    
+
     score_entry(string name, int round, int total, int correct, uint64 time, int bonus = 0, string mode = "Normal")
     {
         player_name = name;
@@ -29,8 +31,9 @@ class score_entry
         correct_swaps = correct;
         timestamp = time;
         time_bonus = bonus;
+        total_score = round * 1000 + bonus;
         game_mode = mode;
-        
+
         if (total > 0) {
             accuracy_percent = (double(correct) / double(total)) * 100.0;
         } else {
@@ -82,7 +85,7 @@ class scoreboard
         m.add_item("All Scores", "all");
         m.add_item("Clear all scores", "clear");
         m.add_item("Return", "return");
-        m.intro_text = "Select which scoreboard to view. Use your navigation keys to move, and press enter to select.";       
+        m.intro_text = "Select which scoreboard to view. " + menu_hint();       
         int res = m.run();
         string selected = m.get_item_id(res);
         
@@ -135,23 +138,21 @@ return;
         setupmenu();
         
         for (uint i = 0; i < filtered_scores.length(); i++) {
-            string entry_text = (i + 1) + ": " + filtered_scores[i].player_name + 
+            string entry_text = (i + 1) + ": " + filtered_scores[i].player_name +
                               ", " + filtered_scores[i].game_mode + " mode";
             if (filtered_scores[i].game_mode == "Normal") {
                 entry_text += ", round " + filtered_scores[i].round_reached;
             } else {
                 entry_text += ", completed in " + (filtered_scores[i].round_reached > 0 ? "victory" : "defeat");
             }
+            entry_text += ", score " + filtered_scores[i].total_score;
             entry_text += ", accuracy " + format_float(filtered_scores[i].accuracy_percent, "", 0, 1) + "%";
-            if (filtered_scores[i].time_bonus > 0) {
-                entry_text += ", bonus " + filtered_scores[i].time_bonus;
-            }
             m.add_item(entry_text, "score_" + i);
         }
         
         m.add_item("Return", "return");
         string title = mode_filter == "" ? "All Local Scores" : mode_filter + " Mode Scores";
-        m.intro_text = title + ". Use your navigation keys to browse the scores.";
+        m.intro_text = title + ". " + menu_hint();
         
         while (true) {
             int res = m.run();
@@ -211,22 +212,19 @@ return;
     
     private void sort_scores()
     {
-        // Simple bubble sort by round reached (descending), then accuracy (descending)
+        // Bubble sort by total_score (descending), then accuracy (descending) as tiebreaker
         for (uint i = 0; i < local_scores.length() - 1; i++) {
             for (uint j = 0; j < local_scores.length() - 1 - i; j++) {
                 bool should_swap = false;
-                
-                // Primary sort: round reached (higher is better)
-                if (local_scores[j].round_reached < local_scores[j + 1].round_reached) {
+
+                if (local_scores[j].total_score < local_scores[j + 1].total_score) {
                     should_swap = true;
-                } 
-                // Secondary sort: if same round, sort by accuracy (higher is better)
-                else if (local_scores[j].round_reached == local_scores[j + 1].round_reached) {
+                } else if (local_scores[j].total_score == local_scores[j + 1].total_score) {
                     if (local_scores[j].accuracy_percent < local_scores[j + 1].accuracy_percent) {
                         should_swap = true;
                     }
                 }
-                
+
                 if (should_swap) {
                     score_entry temp = local_scores[j];
                     local_scores[j] = local_scores[j + 1];
@@ -291,7 +289,10 @@ return;
                 } else {
                     entry.game_mode = "Normal"; // Default for old saves
                 }
-                
+
+                // Compute total_score from loaded fields
+                entry.total_score = entry.round_reached * 1000 + entry.time_bonus;
+
                 local_scores.insert_last(entry);
             }
         }
@@ -309,21 +310,15 @@ return;
         return int(local_scores.length());
     }
     
-    bool is_high_score(int round_reached, double accuracy)
+    bool is_high_score(int round_reached, double accuracy, int time_bonus = 0)
     {
-        if (local_scores.length() < 10) {
-            return true; // Always a high score if we have less than 10
-        }
-        
-        // Check if this score would make it into top 10
+        if (local_scores.length() < 10) return true;
+
+        int new_total = round_reached * 1000 + time_bonus;
         score_entry worst_score = local_scores[local_scores.length() - 1];
-        
-        if (round_reached > worst_score.round_reached) {
-            return true;
-        } else if (round_reached == worst_score.round_reached && accuracy > worst_score.accuracy_percent) {
-            return true;
-        }
-        
+
+        if (new_total > worst_score.total_score) return true;
+        if (new_total == worst_score.total_score && accuracy > worst_score.accuracy_percent) return true;
         return false;
     }
 }

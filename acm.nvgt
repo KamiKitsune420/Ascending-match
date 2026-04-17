@@ -4,10 +4,17 @@ void main()
 set_sound_storage("data/sounds.dat");
 init_touch();
     show_window("AscendingMatch, version "+version);
+if(is_touch_platform())
+
+alert("worning!", "You seem to be running the game on a Mobile device. if on android, please Suspend talkback during play");
+
 readdata();    
-    // Award welcome achievement on first play
-    if (!ach.has_achievement("Welcome to Ascending Match!")) {
-        ach.award("Welcome to Ascending Match!", "Welcome to the world of number sorting! Get ready to challenge your mind and reflexes.");
+    // Award welcome and platform achievements on first run
+    ach.award("Welcome to Ascending Match!");
+    if (PLATFORM == "windows") {
+        ach.award("Windows Player");
+    } else if (PLATFORM == "ios") {
+        ach.award("iOS Player");
     }
     
     wait(500);
@@ -15,7 +22,7 @@ readdata();
         speak("Double tap to start.");
     else
         speak("Press enter to start.");
-    dlgplay("TITLEBIT.wav");
+    dlgplay("TITLEBIT.ogg");
     mainmenu();
 }
 
@@ -195,5 +202,5 @@ void gamesetup()
 
     round_timer.restart();
     tick_timer.restart();
-    tick.load("clock.wav");
+    tick.load("clock.ogg");
 }

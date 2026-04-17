@@ -2,7 +2,7 @@ void setupmenu(bool music_added = false)
 {
 if (music_added)
 {
-m.add_music("menumus.wav");
+m.add_music("menumus.ogg");
 } else
 {
 m.add_music("");
@@ -14,10 +14,10 @@ m.reset();
     m.enable_wrapping = true;
     m.enable_first_letter_navigation = true;
     m.speak_position = false;
-m.click_sound="menuclick.wav";
+m.click_sound="menuclick.ogg";
 m.close_sound="menuclose.wav";
 m.edge_sound="menuedge.wav";
-m.enter_sound="menuenter.wav";
+m.enter_sound="menuenter.ogg";
 m.open_sound="menuopen.wav";
-m.wrap_sound="menuwrap.wav";
+m.wrap_sound="menuwrap.ogg";
 }

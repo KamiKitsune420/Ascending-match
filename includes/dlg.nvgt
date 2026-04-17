@@ -45,7 +45,7 @@ void sctext(string txt, int ms, string opnsnd, string scsound)
 void dlg(string message, bool dlgcoppy=true, bool dlgsound=true, int timeout=-1)
 {
 timer timeouter;
-if(dlgsound==true) temp.play_stationary("dlgopn.wav", false);
+if(dlgsound==true) temp.play_stationary("dlgopn.ogg", false);
 speak(message);
 while(true)
 {
@@ -82,7 +82,7 @@ wait(5);
 update_touch();
 if(key_repeating(KEY_RETURN) and skippable==true or key_down(KEY_A) and skippable==true)
 {
-    p.play_stationary("titskip.wav", false);
+    p.play_stationary("titskip.ogg", false);
 if (fadeable==true)
 {
 while (dlgaudio.volume>=-40)

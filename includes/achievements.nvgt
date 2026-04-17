@@ -1,16 +1,25 @@
+class achievement_definition
+{
+    string title;
+    string description;
+
+    achievement_definition() { title = ""; description = ""; }
+    achievement_definition(string t, string d) { title = t; description = d; }
+}
+
 class achievement_entry
 {
     string title;
     string description;
     uint64 timestamp;
-    
+
     achievement_entry()
     {
         title = "";
         description = "";
         timestamp = 0;
     }
-    
+
     achievement_entry(string t, string desc, uint64 time)
     {
         title = t;
@@ -21,154 +30,222 @@ class achievement_entry
 
 class achievement
 {
+    achievement_definition[] all_definitions;
     achievement_entry[] unlocked_achievements;
+    achievement_entry[] locked_achievements;
     savedata@ achievement_data;
     sound_pool@ pool;
     int achievement_sound_slot = -1;
-    
+
     achievement()
     {
         @achievement_data = savedata("data/game.dat", "ApLNtsWrYHFl8xnV9L6BCCR9D0m2copzogusgPCjyi6RiWBxaB5af7yfvukIVrOvnUUnR3pNPIj7Gynrj5uqy2UvI2OTM8IfAXvdjOfzGPh3caFw8oYbOenAntgunq3t1ZkYf1H3byLAGYQctbLyqiFwULTy1jvras9DjprhgWBo12XJRmqVwMh61dtqwr3LlHKjBTBA1Ggi7Mw");
+        init_definitions();
         load_achievements();
+        rebuild_locked();
     }
-    
-    void award(string title, string description)
+
+    private void init_definitions()
     {
-        // Check if this achievement is already unlocked
-        for (uint i = 0; i < unlocked_achievements.length(); i++) {
-            if (unlocked_achievements[i].title == title) {
-                return; // Already unlocked, don't award again
+        all_definitions.resize(0);
+        // General
+        all_definitions.insert_last(achievement_definition("Welcome to Ascending Match!", "Welcome to the world of number sorting! Get ready to challenge your mind and reflexes."));
+        // Platform
+        all_definitions.insert_last(achievement_definition("Windows Player", "You're playing on Windows! Welcome to the PC master race of number sorting."));
+        all_definitions.insert_last(achievement_definition("iOS Player", "You're playing on iOS! Sorting numbers on the go, one tap at a time."));
+        // Round milestones
+        all_definitions.insert_last(achievement_definition("First Steps", "You completed your first round! You're getting the hang of this number sorting business."));
+        all_definitions.insert_last(achievement_definition("Getting Warmed Up", "Five rounds completed! The numbers are getting trickier, but you're keeping up."));
+        all_definitions.insert_last(achievement_definition("Decimal Master", "You've mastered the basics and conquered your first decimal numbers!"));
+        all_definitions.insert_last(achievement_definition("Double Digits", "Ten rounds! You're officially in the big leagues now."));
+        all_definitions.insert_last(achievement_definition("Negative Nancy", "You've successfully sorted negative numbers! Math class is paying off."));
+        all_definitions.insert_last(achievement_definition("Lucky Fifteen", "Fifteen rounds of number sorting mastery! The developer is impressed."));
+        all_definitions.insert_last(achievement_definition("Ready to Race", "You've unlocked Time Race mode! Now you can compete against the computer in high-speed number sorting challenges."));
+        all_definitions.insert_last(achievement_definition("Fraction Pioneer", "You've reached round 20 and encountered your first fractions! Math class is really paying off now."));
+        all_definitions.insert_last(achievement_definition("The Twenties Club", "Twenty rounds! You're now handling mixed number types like a pro."));
+        all_definitions.insert_last(achievement_definition("Precision Expert", "Twenty-five rounds! You've entered the realm of precision decimals. Few have made it this far."));
+        all_definitions.insert_last(achievement_definition("Sorting Legend", "Thirty rounds! You are officially a number sorting legend. The developer bows to your skills."));
+        all_definitions.insert_last(achievement_definition("Rule 34", "Round 34. Rule 34 of the internet states that if it exists, there's a sorted version of it. You've just proven this applies to number lists too."));
+        all_definitions.insert_last(achievement_definition("The Answer", "Round 42! You've found the answer to life, the universe, and everything! Unfortunately Douglas Adams never told us what the question was, and neither will we."));
+        all_definitions.insert_last(achievement_definition("The Ultimate Sorter", "FIFTY ROUNDS! You have achieved the impossible. You are the ultimate number sorting champion!"));
+        all_definitions.insert_last(achievement_definition("Six Seven!!!", "Round 67. It is 2026 and people are still saying six seven. The developer was bored and added this achievement, please don't shoot him. Six seven!"));
+        all_definitions.insert_last(achievement_definition("NICE!!!", "ROUND 69!!! The developer's absolute favourite number! This is not just an achievement, this is a spiritual experience. NICE!!! The developer is throwing a party in your honour right now."));
+        all_definitions.insert_last(achievement_definition("sooooo... board...", "huh. you actually made it this far? I err, didn't expect this. maybe put down the game and take a break? you know what? take this for you're trouble!:p"));
+        all_definitions.insert_last(achievement_definition("420 Blaze It", "Round 420! The number gods have smiled upon you. Somewhere out there, Snoop Dogg is nodding approvingly at your number sorting skills."));
+        // Time Race
+        all_definitions.insert_last(achievement_definition("Human Supremacy", "You defeated the computer in a time race! Human intelligence prevails!"));
+        // Speed / time bonus
+        all_definitions.insert_last(achievement_definition("Speed Demon", "You earned 50+ time bonus points in a single round! That's some serious speed sorting."));
+        all_definitions.insert_last(achievement_definition("Rocket Sorter", "100+ time bonus points in one round! You're sorting numbers faster than the speed of sound."));
+        all_definitions.insert_last(achievement_definition("Speedy Sorter", "You've earned your first 100 time bonus points! Your quick thinking is paying off."));
+        all_definitions.insert_last(achievement_definition("Lightning Fast", "500 time bonus points! You're consistently completing rounds at impressive speed."));
+        all_definitions.insert_last(achievement_definition("Time Master", "1000 time bonus points! You've mastered the art of rapid number sorting."));
+        // Accuracy
+        all_definitions.insert_last(achievement_definition("Precision Player", "You achieved 90% or higher accuracy! Your sorting skills are incredibly precise."));
+        all_definitions.insert_last(achievement_definition("Accurate Sorter", "You achieved 75% or higher accuracy! Most of your swaps were beneficial."));
+        all_definitions.insert_last(achievement_definition("Getting Better", "You achieved 50% or higher accuracy! You're learning the optimal sorting strategies."));
+        all_definitions.insert_last(achievement_definition("Master of Chaos", "Congratulations! You achieved 0% accuracy. Every single swap made things worse. This is actually impressive in its own special way. Maybe try the opposite of what you think next time?"));
+        // Swap milestones
+        all_definitions.insert_last(achievement_definition("Swap Master", "You made 100 or more swaps! That's a lot of number rearranging."));
+        all_definitions.insert_last(achievement_definition("Swap Maniac", "You made 500 or more swaps! You really love moving those numbers around."));
+        // Misc
+        all_definitions.insert_last(achievement_definition("The Great Contemplator", "You sat through an entire round without making a single swap. Were you meditating? Taking a nap? Or perhaps you're playing some advanced form of number zen that us mere mortals don't understand. Either way, that's dedication to doing absolutely nothing!"));
+        all_definitions.insert_last(achievement_definition("The Independent Thinker", "You completed the game without using a single hint! Either you're incredibly skilled, or you're too proud to ask for help. We respect both possibilities."));
+        all_definitions.insert_last(achievement_definition("The Hint Addict", "You used more than 5 hints in a single game! At this point, the game is practically playing itself. Maybe next time try trusting your own brain a little more? It's not as scary as it seems, we promise!"));
+    }
+
+    private void rebuild_locked()
+    {
+        locked_achievements.resize(0);
+        for (uint i = 0; i < all_definitions.length(); i++) {
+            bool found = false;
+            for (uint j = 0; j < unlocked_achievements.length(); j++) {
+                if (unlocked_achievements[j].title == all_definitions[i].title) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                achievement_entry e(all_definitions[i].title, all_definitions[i].description, 0);
+                locked_achievements.insert_last(e);
             }
         }
-        
-        // Add the new achievement
+    }
+
+    void award(string title)
+    {
+        // Check if already unlocked
+        for (uint i = 0; i < unlocked_achievements.length(); i++) {
+            if (unlocked_achievements[i].title == title) return;
+        }
+
+        // Look up description from master definitions list
+        string description = "";
+        bool found = false;
+        for (uint i = 0; i < all_definitions.length(); i++) {
+            if (all_definitions[i].title == title) {
+                description = all_definitions[i].description;
+                found = true;
+                break;
+            }
+        }
+        if (!found) return; // Not a recognised achievement
+
         uint64 current_time = get_TIME_STAMP();
         achievement_entry new_achievement(title, description, current_time);
         unlocked_achievements.insert_last(new_achievement);
-        
-        // Save immediately
+
         save_achievements();
-        
-        // Play achievement notification
+        rebuild_locked();
         show_achievement_notification(title, description);
     }
-    
+
     private void show_achievement_notification(string title, string description)
     {
-        // Play achievement sound using sound pool
         if (@p != null) {
-            achievement_sound_slot = p.play_stationary("achget.wav", false);
-            
-            // Wait for the sound to finish playing
+            achievement_sound_slot = p.play_stationary("achget.ogg", false);
             while (achievement_sound_slot != -1 && p.sound_is_playing(achievement_sound_slot)) {
                 wait(10);
             }
         }
-        
-        // Show the achievement notification using sctext
-        sctext("Achievement awarded, " + title + "!", 40, "dlgopn.wav", "gamevoice.wav");
-        sctext(description, 40, "dlgopn.wav", "gamevoice.wav");
+        sctext("Achievement awarded, " + title + "!", 40, "dlgopn.ogg", "gamevoice.ogg");
+        sctext(description, 40, "dlgopn.ogg", "gamevoice.ogg");
     }
-    
+
     void show_unlocked()
     {
-        if (unlocked_achievements.length() == 0) {
-            alert("error", "No achievements unlocked yet!");
-            return;
-        }
-        
         setupmenu();
-        m.add_music("achmenu.wav");
+        m.add_music("achmenu.ogg");
+
+        if (unlocked_achievements.length() == 0) {
+            m.intro_text = "No achievements unlocked yet. You have " + get_total_count() + " to earn. " + menu_hint();
+        } else {
+            m.intro_text = get_achievement_count() + " of " + get_total_count() + " achievements unlocked. " + menu_hint();
+        }
 
         for (uint i = 0; i < unlocked_achievements.length(); i++) {
-            m.add_item(unlocked_achievements[i].title, "achievement_" + i);
+            m.add_item(unlocked_achievements[i].title, "unlocked_" + i);
         }
-        
         m.add_item("Return", "return");
-        m.intro_text = "Your unlocked achievements. Use your navigation keys to browse and press enter to hear the description.";
-        
+
         while (true) {
             int res = m.run();
             string selected = m.get_item_id(res);
-            
+
             if (res == -1 || selected == "return") {
                 m.fade_music();
                 break;
             }
-            
-            // Show detailed achievement info
-            if (selected.substr(0, 12) == "achievement_") {
-                uint index = parse_int(selected.substr(12));
+
+            if (selected.substr(0, 9) == "unlocked_") {
+                uint index = parse_int(selected.substr(9));
                 if (index < unlocked_achievements.length()) {
-                    show_achievement_details(index);
+                    sctext(unlocked_achievements[index].title + ". " + unlocked_achievements[index].description, 40, "dlgopn.ogg", "gamevoice.ogg");
                 }
             }
         }
     }
-    
-    private void show_achievement_details(uint index)
-    {
-        achievement_entry@ entry = @unlocked_achievements[index];
-        sctext(entry.title + ". " + entry.description, 40, "dlgopn.wav", "gamevoice.wav");
-    }
-    
+
     private void save_achievements()
     {
-        // Save each achievement entry
         for (uint i = 0; i < unlocked_achievements.length(); i++) {
             string prefix = "achievement_" + i + "_";
             achievement_data.add(prefix + "title", unlocked_achievements[i].title);
             achievement_data.add(prefix + "description", unlocked_achievements[i].description);
             achievement_data.add(prefix + "timestamp", int64(unlocked_achievements[i].timestamp));
         }
-        
         achievement_data.add("achievement_count", int(unlocked_achievements.length()));
         achievement_data.save();
     }
-    
+
     private void load_achievements()
     {
         achievement_data.load();
-        
-        if (!achievement_data.d.exists("achievement_count")) {
-            return; // No achievements saved yet
-        }
-        
+
+        if (!achievement_data.d.exists("achievement_count")) return;
+
         int count = achievement_data.read_int("achievement_count");
         unlocked_achievements.resize(0);
-        
+
         for (int i = 0; i < count; i++) {
             string prefix = "achievement_" + i + "_";
-            
             if (achievement_data.d.exists(prefix + "title")) {
                 achievement_entry entry;
                 entry.title = achievement_data.read_string(prefix + "title");
                 entry.description = achievement_data.read_string(prefix + "description");
                 entry.timestamp = uint64(achievement_data.read_int64(prefix + "timestamp"));
-                
                 unlocked_achievements.insert_last(entry);
             }
         }
     }
-    
+
     void clear_achievements()
     {
         unlocked_achievements.resize(0);
         achievement_data.d.delete_all();
         achievement_data.save();
+        rebuild_locked();
     }
-    
+
     int get_achievement_count()
     {
         return int(unlocked_achievements.length());
     }
-    
+
+    int get_total_count()
+    {
+        return int(all_definitions.length());
+    }
+
+    int get_locked_count()
+    {
+        return int(locked_achievements.length());
+    }
+
     bool has_achievement(string title)
     {
         for (uint i = 0; i < unlocked_achievements.length(); i++) {
-            if (unlocked_achievements[i].title == title) {
-                return true;
-            }
+            if (unlocked_achievements[i].title == title) return true;
         }
         return false;
     }
